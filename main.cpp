@@ -144,8 +144,12 @@ std::string allowedMove(board board, std::string move, bool isWhite){
           board.tiles[x][y] = board.tiles[x][y+1];
           output.at(0) = x+97;
           output.at(1) = (y+1)+49;
-
-          std::cout << x +97;
+        }
+      }if(isWhite == 0){
+        if(board.tiles[x][y-1].state == 'p'){
+          board.tiles[x][y] = board.tiles[x][y-1];
+          output.at(0) = x+97;
+          output.at(1) = (y-1)+49;
         }
       }
     }
@@ -173,7 +177,6 @@ int main(){
   print(board);
 
   std::string move;
-
   bool running = true;
   while(running == true){
     if(moveAccepted){
@@ -185,7 +188,6 @@ int main(){
     if(move.size() < 3 && move.size() > 1){
       isallowed = allowedMove(board, move, is_white);
       if(isallowed == move){moveAccepted=0;}else{moveAccepted=1;
-        std::cout << "swap" << isallowed <<'\n';
         board = movePiece(board, isallowed, move);
       }
     }else{moveAccepted = false;}
