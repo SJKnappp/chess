@@ -2,14 +2,14 @@
 
 void print(board board){
   Colour::Modifier blue(Colour::FG_BLUE);
-  Colour::Modifier def(Colour::FG_DEFAULT);
+  Colour::Modifier def(Colour::FG_DEFAULT);https://github.com/SJKnappp/chess
 
   //prints top line
   char val = 'a';
   val -= 1;
   for(int i = 0; i < 8; i++){
     val += 1;
-    std::cout << val << " ";
+    std::cout << val << "   ";
   }std::cout << '\n';
 
   for(int j=0;j<8;j++){
@@ -25,12 +25,21 @@ void print(board board){
         std::cout << def;
         break;
       }
-      std::cout << board.tiles[i][j].state << " | " << def;
+      std::cout << board.tiles[i][j].state  << def << " | ";
     }
-    std::endl;
-    for(int i=0;i<)
     //prints row number
     std::cout << " " << j << '\n';
+
+    for(int i=0;i<31;i++){
+      if(i == 2){
+        std::cout << '+';
+      }else if((i-6) % 4 == 0 ){
+        std::cout << '+';
+      }else{
+        std::cout << '-';
+      }
+    }
+    std::cout << '\n';
   }
 }
 
