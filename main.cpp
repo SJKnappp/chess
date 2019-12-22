@@ -28,7 +28,7 @@ void print(board board){
       std::cout << board.tiles[i][j].state  << def << " | ";
     }
     //prints row number
-    std::cout << " " << j << '\n';
+    std::cout << " " << j + 1 << '\n';
 
     for(int i=0;i<31;i++){
       if(i == 2){
@@ -91,11 +91,12 @@ board intialise(){
   return newboard;
 }
 
-bool allowedMove(board board, std::string move, bool isWhite){
+std::string allowedMove(board board, std::string move, bool isWhite){
   //moving pawns
   int x;
   int y;
   char peice;
+  std::string output; //outputs input location if move not allowed and peice to move if allowed
 
   int state;
   if(isWhite == 0){
@@ -105,7 +106,6 @@ bool allowedMove(board board, std::string move, bool isWhite){
   if(move.size() ==2){
     peice = 'p';
     x = move.at(0) -97;
-    std::cout << x << '\n';
     y = move.at(1) -49;
 
 
@@ -122,7 +122,7 @@ bool allowedMove(board board, std::string move, bool isWhite){
       break;
       default:
       std::cout << "please input r, n, b, q, k for peice to be moved" << '\n';
-      return false;
+      return move;
     }
     x = move.at(1) -97;
     y = move.at(2) -49;
@@ -130,28 +130,41 @@ bool allowedMove(board board, std::string move, bool isWhite){
   }
 
   if(x < 0 || x > 7 || y < 0 || y > 7){
-    return false;
+    return move;
   }
 
   if(state == board.tiles[x][y].player){
-    return false;
+    return move;
   }
 
   switch (peice) {
     case 'p':
       if(isWhite == 1){
-        //if(board.tiles[x][y].state ){}
+        if(board.tiles[x][y+1].state == 'p'){
+          board.tiles[x][y] = board.tiles[x][y+1];
+          std::cout << x +97;
+        }
       }
-  }
+    }
+    return output;
+}
 
-  return true;
+board movePiece(board board, std::string start, std::string end){
+  int xb = start.at(0)-97;
+  int yb = start.at(1)-49;
+  int xn = end.at(0)-97;
+  int yn = end.at(1)-49;
+
+  board.tiles[xn][yn] = board.tiles[xb][yb];
+  board.tiles[xb][yb] = {}; board.tiles[xb][yb].state = ' ';
+  return board;
 }
 
 int main(){
+  std::string isallowed;
   board board = intialise();
   bool is_white = true;
   bool moveAccepted = true;
-  bool isallowed;
   print(board);
 
   std::string move;
@@ -162,16 +175,18 @@ int main(){
       std::cout << "please input move player: ";
       if(is_white == true){std::cout << "white" << '\n';}
       else{std::cout << "black" << '\n';}
-    }else{std::cout << "please reenter your move";}
+    }else{std::cout << "please reenter your move" << '\n'; }
     std::cin >> move;
     if(move.size() < 3 && move.size() > 1){
       isallowed = allowedMove(board, move, is_white);
-      if(isallowed == 1){moveAccepted=1;}else{moveAccepted=0;}
+      if(isallowed == move){moveAccepted=0;}else{moveAccepted=1;
+        board = movePiece(board, move, isallowed);
+      }
     }else{moveAccepted = false;}
     board.PGN.push_back(move);
     if(moveAccepted==1){
       if(is_white == 0){is_white = 1;}else{is_white = 0;}
+      print(board);
     }
   }
-
 }

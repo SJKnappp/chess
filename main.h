@@ -34,5 +34,5 @@ namespace Colour{
 
 int main();
 void print(board board);
-bool allowedMove(board board, std::string move, bool isWhite);
+std::string allowedMove(board board, std::string move, bool isWhite);
 board intialise();
