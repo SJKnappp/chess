@@ -2,7 +2,7 @@
 
 void print(board board){
   Colour::Modifier blue(Colour::FG_BLUE);
-  Colour::Modifier def(Colour::FG_DEFAULT);https://github.com/SJKnappp/chess
+  Colour::Modifier def(Colour::FG_DEFAULT);
 
   //prints top line
   char val = 'a';
@@ -104,8 +104,9 @@ bool allowedMove(board board, std::string move, bool isWhite){
 
   if(move.size() ==2){
     peice = 'p';
-    x = move.at(0) -96;
-    y = move.at(1) -48;
+    x = move.at(0) -97;
+    std::cout << x << '\n';
+    y = move.at(1) -49;
 
 
     //checks to see if there's the same colour as the players
@@ -123,18 +124,26 @@ bool allowedMove(board board, std::string move, bool isWhite){
       std::cout << "please input r, n, b, q, k for peice to be moved" << '\n';
       return false;
     }
-    x = move.at(1) -96;
-    y = move.at(2) -48;
+    x = move.at(1) -97;
+    y = move.at(2) -49;
     //board.tiles[x-1][y-1].state;
   }
 
-  if(x < 0 || x > 8 || y < 0 || y > 8){
+  if(x < 0 || x > 7 || y < 0 || y > 7){
     return false;
   }
 
   if(state == board.tiles[x][y].player){
     return false;
   }
+
+  switch (peice) {
+    case 'p':
+      if(isWhite == 1){
+        //if(board.tiles[x][y].state ){}
+      }
+  }
+
   return true;
 }
 
