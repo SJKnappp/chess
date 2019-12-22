@@ -3,6 +3,12 @@
 #include <string>
 #include <vector>
 
+struct move{
+  int x;
+  int y;
+  char state = ' ';
+};
+
 struct peice{
   int player = 0; //not played = 0 black =1 white =2
   bool moved = 0;
@@ -35,5 +41,5 @@ namespace Colour{
 
 int main();
 void print(board board);
-std::string allowedMove(board board, std::string move, bool isWhite);
+move allowedMove(board board, move move, bool isWhite);
 board intialise();

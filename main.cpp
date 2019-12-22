@@ -91,87 +91,61 @@ board intialise(){
   return newboard;
 }
 
-std::string allowedMove(board board, std::string move, bool isWhite){
+move allowedMove(board board, move input, bool isWhite){
   //moving pawns
-  int x;
-  int y;
-  char peice;
-  std::string output = "  "; //outputs input location if move not allowed and peice to move if allowed
 
+  move output = {}; //outputs input location if move not allowed and peice to move if allowed
   int state;
+
+  output.state = 'a'; //used to compair in next function
+
   if(isWhite == 0){
     state =1;
   }else{state=2;}
 
-  if(move.size() ==2){
-    peice = 'p';
-    x = move.at(0) -97;
-    y = move.at(1) -49;
-
-
-    //checks to see if there's the same colour as the players
-  }
-  if(move.size() == 3){
-    peice = move.at(0);
-    std::cout << peice << '\n';
-    switch (peice) {
-      case 'r':
-      case 'n':
-      case 'b':
-      case 'q':
-      case 'k':
-      break;
-      default:
-      std::cout << "please input r, n, b, q, k for peice to be moved" << '\n';
-      return move;
-    }
-    x = move.at(1) -97;
-    y = move.at(2) -49;
-    //board.tiles[x-1][y-1].state;
+  if(input.x < 0 || input.x > 7 || input.y < 0 || input.y > 7){
+    return input;
   }
 
-  if(x < 0 || x > 7 || y < 0 || y > 7){
-    return move;
+  if(state == board.tiles[input.x][input.y].player){
+    return input;
   }
 
-  if(state == board.tiles[x][y].player){
-    return move;
-  }
-
-  switch (peice) {
+  switch (input.state) {
     case 'p':
       if(isWhite == 1){
-        if(board.tiles[x][y+1].state == 'p'){
-          board.tiles[x][y] = board.tiles[x][y+1];
-          output.at(0) = x+97;
-          output.at(1) = (y+1)+49;
+        if(board.tiles[input.x][input.y+1].state == 'p'){
+          board.tiles[input.x][input.y] = board.tiles[input.x][input.y+1];
+          output.x = input.x;
+          output.y = input.y+1;
         }
       }if(isWhite == 0){
-        if(board.tiles[x][y-1].state == 'p'){
-          board.tiles[x][y] = board.tiles[x][y-1];
-          output.at(0) = x+97;
-          output.at(1) = (y-1)+49;
+        if(board.tiles[input.x][input.y-1].state == 'p'){
+          board.tiles[input.x][input.y] = board.tiles[input.x][input.y-1];
+          input.x = input.x;
+          input.y = input.y-1;
         }
       }break;
       case 'r':{
         bool testUp = 1, testDown = 1, testRight =1, testLeft =1;
+
           for(int i=0; i<7; i++){
-            if((board.tiles[x][y+i].state == 'r' || board.tiles[x][y+i].state == ' ') && testUp == 1 && y+i < 8){
-              if(board.tiles[x][y+i].state == 'r') { output.at(0) = x+97; output.at(1) = (y+i)+49; return output;}
-            }else{testUp = 0;}
-            if((board.tiles[x][y-i].state == 'r' || board.tiles[x][y-i].state == ' ') && testDown == 1 && y+i > 0){
-              if(board.tiles[x][y-i].state == 'r'){output.at(0) = x+97; output.at(1) = (y-i)+49; return output;}
+            if((board.tiles[input.x][input.y+i].state == 'r' || board.tiles[input.x][input.y+i].state == ' ') && testUp == 1 && input.y+i < 8){
+              if(board.tiles[input.x][input.y+i].state == 'r') { output.x = input.x; output.y = (input.y+i); return output;}
+            }else{testUp = 0; }
+            if((board.tiles[input.x][input.y-i].state == 'r' || board.tiles[input.x][input.y-i].state == ' ') && testDown == 1 && input.y+i > 0){
+              if(board.tiles[input.x][input.y-i].state == 'r'){output.x = input.x; output.y = (input.y-i); return output;}
             }else{testDown = 0;}
-            if((board.tiles[x+i][y].state == 'r' || board.tiles[x+i][y].state == ' ') && testRight == 1 && x+i < 8){
-              if(board.tiles[x+i][y].state == 'r'){output.at(0) = (x+i)+97; output.at(1) = y+49; return output;}
+            if((board.tiles[input.x+i][input.y].state == 'r' || board.tiles[input.x+i][input.y].state == ' ') && testRight == 1 && input.x+i < 8){
+              if(board.tiles[input.x+i][input.y].state == 'r'){output.x = input.x+i; output.y = input.y; return output;}
             }else{testRight = 0;}
-            if((board.tiles[x-i][y].state == 'r' || board.tiles[x-i][y].state == ' ') && testLeft == 1 && x-i >0){
-              if(board.tiles[x-i][y].state == 'r'){output.at(0) = (x-i)+97; output.at(1) = y+49; return output;}
+            if((board.tiles[input.x-i][input.y].state == 'r' || board.tiles[input.x-i][input.y].state == ' ') && testLeft == 1 && input.x-i >0){
+              if(board.tiles[input.x-i][input.y].state == 'r'){output.x = input.x-i; output.y = input.y; return output;}
             }else{testLeft = 0;}
 
-            if(testUp=0 && testDown == 0 && testLeft == 0 && testRight ==0){
-            return move;
-          }
+            if(testUp==0 && testDown == 0 && testLeft == 0 && testRight ==0){
+              return input;
+            }
         }
         break;
       }
@@ -184,7 +158,6 @@ std::string allowedMove(board board, std::string move, bool isWhite){
       case 'k':
       break;
     }
-    std::cout << output << '\n';
     return output;
 }
 
@@ -193,7 +166,6 @@ board movePiece(board board, std::string start, std::string end){
   int yb = start.at(1)-49;
   int xn = end.at(0)-97;
   int yn = end.at(1)-49;
-  std::cout << xb << yb << xn << yn << '\n';
 
   board.tiles[xn][yn] = board.tiles[xb][yb];
   board.tiles[xb][yb] = {}; board.tiles[xb][yb].state = ' ';
@@ -204,11 +176,12 @@ board movePiece(board board, std::string start, std::string end){
 int main(){
   std::string isallowed;
   board board = intialise();
+  move move;
   bool is_white = true;
   bool moveAccepted = true;
   print(board);
 
-  std::string move;
+  std::string inputMove;
   bool running = true;
   while(running == true){
     if(moveAccepted){
@@ -216,14 +189,32 @@ int main(){
       if(is_white == true){std::cout << "white" << '\n';}
       else{std::cout << "black" << '\n';}
     }else{std::cout << "please reenter your move" << '\n'; }
-    std::cin >> move;
-    if(move.size() < 4 && move.size() > 1){
+    std::cin >> inputMove;
+
+    if(inputMove.size() == 2){
+      move.state = 'p';
+      move.x = inputMove.at(0) - 97;
+      move.y = inputMove.at(1) - 49;
+    }
+    else if(inputMove.size() == 3){
+      move.state = inputMove.at(0);
+      move.x = inputMove.at(1) - 97;
+      move.y = inputMove.at(2) - 49;
+    }else{std::cout << "input of the wrong lenght" << '\n'; moveAccepted =0;}
+
+    std::cout << move.state << move.x << move.y << '\n';
+
+    if(moveAccepted == 1){
+      allowedMove(board, move, is_white);
+    }
+
+    /*if(move.size() < 4 && move.size() > 1){
       isallowed = allowedMove(board, move, is_white);
       if(isallowed == move){moveAccepted=0;}else{moveAccepted=1;
         board = movePiece(board, isallowed, move);
       }
-    }else{moveAccepted = false;}
-    board.PGN.push_back(move);
+    }else{moveAccepted = false;}*/
+    board.PGN.push_back(inputMove);
     if(moveAccepted==1){
       if(is_white == 0){is_white = 1;}else{is_white = 0;}
       print(board);
