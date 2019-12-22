@@ -151,7 +151,37 @@ std::string allowedMove(board board, std::string move, bool isWhite){
           output.at(0) = x+97;
           output.at(1) = (y-1)+49;
         }
+      }break;
+      case 'r':{
+        bool testUp = 1, testDown = 1, testRight =1, testLeft =1;
+          for(int i=0; i<7; i++){
+            if((board.tiles[x][y+i].state == 'r' || board.tiles[x][y+i].state == ' ') && testUp == 1 && y+i < 8){
+              if(board.tiles[x][y+i].state == 'r') { output.at(0) = x+97; output.at(1) = (y+i)+49; return output;}
+            }else{testUp = 0;}
+            if((board.tiles[x][y-i].state == 'r' || board.tiles[x][y-i].state == ' ') && testDown == 1 && y+i > 0){
+              if(board.tiles[x][y-i].state == 'r'){output.at(0) = x+97; output.at(1) = (y-i)+49; return output;}
+            }else{testDown = 0;}
+            if((board.tiles[x+i][y].state == 'r' || board.tiles[x+i][y].state == ' ') && testRight == 1 && x+i < 8){
+              if(board.tiles[x+i][y].state == 'r'){output.at(0) = (x+i)+97; output.at(1) = y+49; return output;}
+            }else{testRight = 0;}
+            if((board.tiles[x-i][y].state == 'r' || board.tiles[x-i][y].state == ' ') && testLeft == 1 && x-i >0){
+              if(board.tiles[x-i][y].state == 'r'){output.at(0) = (x-i)+97; output.at(1) = y+49; return output;}
+            }else{testLeft = 0;}
+
+            if(testUp=0 && testDown == 0 && testLeft == 0 && testRight ==0){
+            return move;
+          }
+        }
+        break;
       }
+      case 'n':
+      break;
+      case 'b':
+      break;
+      case 'q':
+      break;
+      case 'k':
+      break;
     }
     std::cout << output << '\n';
     return output;
@@ -166,6 +196,7 @@ board movePiece(board board, std::string start, std::string end){
 
   board.tiles[xn][yn] = board.tiles[xb][yb];
   board.tiles[xb][yb] = {}; board.tiles[xb][yb].state = ' ';
+  board.tiles[xn][yn].moved=1;
   return board;
 }
 
