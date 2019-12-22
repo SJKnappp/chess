@@ -91,7 +91,28 @@ board intialise(){
   return newboard;
 }
 
+bool allowedMove(board board, string move){
+
+}
+
 int main(){
-  board intial = intialise();
-  print(intial);
+  board board = intialise();
+  bool is_white = true;
+  print(board);
+
+  std::string move;
+
+  bool running = true;
+  while(running == true){
+    std::cout << "please input move player: ";
+    if(is_white == true){std::cout << "white" << '\n';}
+    else{std::cout << "black" << '\n';}
+    std::cin >> move;
+    if(move.size() < 3 && move.size() > 1){
+
+    }
+    board.PGN.push_back(move);
+    is_white += 1;
+  }
+
 }

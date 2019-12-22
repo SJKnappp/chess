@@ -1,16 +1,17 @@
 #include <iostream>
 #include <ostream>
+#include <string>
+#include <vector>
 
-  struct peice{
-    int player = 0 ;
-    char state = ' ';
-  };
+struct peice{
+  int player = 0 ;
+  char state = ' ';
+};
 
-
-  struct board{
-    peice tiles[8][8];
-  };
-  int main();
+struct board{
+  peice tiles[8][8];
+  std::vector<std::string> PGN;
+};
 
 
 namespace Colour{
@@ -29,3 +30,8 @@ namespace Colour{
     }
   };
 }
+
+
+int main();
+void print(board board);
+board intialise();
