@@ -96,7 +96,7 @@ std::string allowedMove(board board, std::string move, bool isWhite){
   int x;
   int y;
   char peice;
-  std::string output; //outputs input location if move not allowed and peice to move if allowed
+  std::string output = "  "; //outputs input location if move not allowed and peice to move if allowed
 
   int state;
   if(isWhite == 0){
@@ -142,10 +142,14 @@ std::string allowedMove(board board, std::string move, bool isWhite){
       if(isWhite == 1){
         if(board.tiles[x][y+1].state == 'p'){
           board.tiles[x][y] = board.tiles[x][y+1];
+          output.at(0) = x+97;
+          output.at(1) = (y+1)+49;
+
           std::cout << x +97;
         }
       }
     }
+    std::cout << output << '\n';
     return output;
 }
 
@@ -154,6 +158,7 @@ board movePiece(board board, std::string start, std::string end){
   int yb = start.at(1)-49;
   int xn = end.at(0)-97;
   int yn = end.at(1)-49;
+  std::cout << xb << yb << xn << yn << '\n';
 
   board.tiles[xn][yn] = board.tiles[xb][yb];
   board.tiles[xb][yb] = {}; board.tiles[xb][yb].state = ' ';
@@ -180,7 +185,8 @@ int main(){
     if(move.size() < 3 && move.size() > 1){
       isallowed = allowedMove(board, move, is_white);
       if(isallowed == move){moveAccepted=0;}else{moveAccepted=1;
-        board = movePiece(board, move, isallowed);
+        std::cout << "swap" << isallowed <<'\n';
+        board = movePiece(board, isallowed, move);
       }
     }else{moveAccepted = false;}
     board.PGN.push_back(move);
