@@ -115,23 +115,23 @@ move allowedMove(board board, move input, bool isWhite){
   }
 
   switch (input.state) {
-    case 'p':{
-      if(isWhite == 1){
-        std::cout << input.x << input.y << '\n';
-        if(board.tiles[input.x][input.y+1].state == 'p'){
-          board.tiles[input.x][input.y] = board.tiles[input.x][input.y+1];
-          output.x = input.x;
-          output.y = input.y+1;
-          return output;
-        }
-      }else{
-        if(board.tiles[input.x][input.y-1].state == 'p'){
-          board.tiles[input.x][input.y] = board.tiles[input.x][input.y-1];
-          output.x = input.x;
-          output.y = input.y-1;
-          return output;
-        }
-      }break;}
+      case 'p':{
+        if(isWhite == 1){  
+          if(board.tiles[input.x][input.y+1].state == 'p'){
+            board.tiles[input.x][input.y] = board.tiles[input.x][input.y+1];
+            output.x = input.x;
+            output.y = input.y+1;
+            return output;
+          }
+        }else{
+          std::cout << input.x << input.y << '\n';
+          if(board.tiles[input.x][input.y-1].state == 'p'){
+            board.tiles[input.x][input.y] = board.tiles[input.x][input.y-1];
+            output.x = input.x;
+            output.y = input.y-1;
+            return output;
+          }
+        }break;}
       case 'r':{
         bool testUp = 1, testDown = 1, testRight =1, testLeft =1;
 
@@ -155,7 +155,7 @@ move allowedMove(board board, move input, bool isWhite){
         }
         break;
       }
-      case 'n':{}
+      case 'n':{
       break;}
       case 'b':{
       break;}
