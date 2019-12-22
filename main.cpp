@@ -115,20 +115,23 @@ move allowedMove(board board, move input, bool isWhite){
   }
 
   switch (input.state) {
-    case 'p':
+    case 'p':{
       if(isWhite == 1){
+        std::cout << input.x << input.y << '\n';
         if(board.tiles[input.x][input.y+1].state == 'p'){
           board.tiles[input.x][input.y] = board.tiles[input.x][input.y+1];
           output.x = input.x;
           output.y = input.y+1;
+          return output;
         }
-      }if(isWhite == 0){
+      }else{
         if(board.tiles[input.x][input.y-1].state == 'p'){
           board.tiles[input.x][input.y] = board.tiles[input.x][input.y-1];
-          input.x = input.x;
-          input.y = input.y-1;
+          output.x = input.x;
+          output.y = input.y-1;
+          return output;
         }
-      }break;
+      }break;}
       case 'r':{
         bool testUp = 1, testDown = 1, testRight =1, testLeft =1;
 
@@ -152,16 +155,16 @@ move allowedMove(board board, move input, bool isWhite){
         }
         break;
       }
-      case 'n':
-      break;
-      case 'b':
-      break;
-      case 'q':
-      break;
-      case 'k':
-      break;
+      case 'n':{}
+      break;}
+      case 'b':{
+      break;}
+      case 'q':{
+      break;}
+      case 'k':{
+      break;}
     }
-    return output;
+    return input;
 }
 
 //moves the peices on the board
@@ -191,7 +194,7 @@ int main(){
       std::cout << "please input move player: ";
       if(is_white == true){std::cout << "white" << '\n';}
       else{std::cout << "black" << '\n';}
-    }else{std::cout << "please reenter your move" << '\n'; }
+    }else{std::cout << "please reenter your move" << '\n'; moveAccepted = 1;}
     std::cin >> inputMove;
 
     if(inputMove.size() == 2){
@@ -211,7 +214,7 @@ int main(){
       moveReturn = allowedMove(board, move, is_white);
       if(moveReturn.state == 'a'){
         board = movePiece(board, moveReturn, move);
-      }
+      }else{moveAccepted=0;}
     }
 
     board.PGN.push_back(inputMove);
