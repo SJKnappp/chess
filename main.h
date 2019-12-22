@@ -4,7 +4,7 @@
 #include <vector>
 
 struct peice{
-  int player = 0 ;
+  int player = 0 ; //not played = 0 black =1 white =2
   char state = ' ';
 };
 
