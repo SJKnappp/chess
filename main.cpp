@@ -128,24 +128,25 @@ move allowedMove(board board, move input, bool isWhite){
   switch (input.state) {
       case 'p':{
         if(isWhite == 1){
-          if(board.tiles[input.x][input.y+1].state == 'p' && board.tiles[input.x][input.y+1].player == isWhite){
+          std::cout << board.tiles[input.x][input.y+2].player;
+          if(board.tiles[input.x][input.y+1].state == 'p' && board.tiles[input.x][input.y+1].player == state){
             board.tiles[input.x][input.y] = board.tiles[input.x][input.y+1];
             output.x = input.x;
             output.y = input.y+1;
-            return output;
-          }else if(input.y == 4 && board.tiles[input.x][input.y+2].state=='p' && board.tiles[input.x][input.y+2].player == isWhite){
+            return output; 
+          }else if(input.y == 4 && board.tiles[input.x][input.y+2].state=='p' && board.tiles[input.x][input.y+2].player == state){
             board.tiles[input.x][input.y] = board.tiles[input.x][input.y+2];
             output.x = input.x;
             output.y = input.y+2;
             return output;
           }
         }else{
-          if(board.tiles[input.x][input.y-1].state == 'p' && board.tiles[input.x][input.y-1].player == isWhite){
+          if(board.tiles[input.x][input.y-1].state == 'p' && board.tiles[input.x][input.y-1].player == state){
             board.tiles[input.x][input.y] = board.tiles[input.x][input.y-1];
             output.x = input.x;
             output.y = input.y-1;
             return output;
-          }else if(input.y == 3 && board.tiles[input.x][input.y-2].state == 'p' && board.tiles[input.x][input.y-2].player == isWhite){
+          }else if(input.y == 3 && board.tiles[input.x][input.y-2].state == 'p' && board.tiles[input.x][input.y-2].player == state){
             board.tiles[input.x][input.y] = board.tiles[input.x][input.y-2];
             output.x = input.x;
             output.y = input.y-2;
@@ -157,7 +158,7 @@ move allowedMove(board board, move input, bool isWhite){
 
           for(int i=0; i<7; i++){
             if((board.tiles[input.x][input.y+i].state == 'r' || board.tiles[input.x][input.y+i].state == ' ') && testUp == 1 && input.y+i < 8){
-              if(board.tiles[input.x][input.y+i].state == 'r' && board.tiles[input.x][input.y+i].player == isWhite ) { output.x = input.x; output.y = (input.y+i); return output;}
+              if(board.tiles[input.x][input.y+i].state == 'r' && board.tiles[input.x][input.y+i].player == isWhite ){output.x = input.x; output.y = (input.y+i); return output;}
             }else{testUp = 0; }
             if((board.tiles[input.x][input.y-i].state == 'r' || board.tiles[input.x][input.y-i].state == ' ') && testDown == 1 && input.y+i > 0){
               if(board.tiles[input.x][input.y-i].state == 'r' && board.tiles[input.x][input.y+i].player == isWhite ){output.x = input.x; output.y = (input.y-i); return output;}
