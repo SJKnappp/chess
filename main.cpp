@@ -124,21 +124,31 @@ move allowedMove(board board, move input, bool isWhite){
   if(state == board.tiles[input.x][input.y].player){
     return input;
   }
-  std::cout << isWhite << '\n';
   switch (input.state) {
       case 'p':{
         if(isWhite == 1){
-          std::cout << board.tiles[input.x][input.y+2].player;
           if(board.tiles[input.x][input.y+1].state == 'p' && board.tiles[input.x][input.y+1].player == state){
             board.tiles[input.x][input.y] = board.tiles[input.x][input.y+1];
             output.x = input.x;
             output.y = input.y+1;
-            return output; 
+            return output;
           }else if(input.y == 4 && board.tiles[input.x][input.y+2].state=='p' && board.tiles[input.x][input.y+2].player == state){
             board.tiles[input.x][input.y] = board.tiles[input.x][input.y+2];
             output.x = input.x;
             output.y = input.y+2;
             return output;
+          }else if(board.tiles[input.x][input.y].player == 2){
+            if (board.tiles[input.x+1][input.y+1].state == 'p' && board.tiles[input.x+1][input.y+1].player == state) {
+              board.tiles[input.x][input.y] = board.tiles[input.x+1][input.y+1];
+              output.x = input.x+1;
+              output.y = input.y+1;
+              return output;
+            }else if(board.tiles[input.x-1][input.y+1].state == 'p' && board.tiles[input.x-1][input.y+1].player == state){
+              board.tiles[input.x][input.y] = board.tiles[input.x-1][input.y+1];
+              output.x = input.x-1;
+              output.y = input.y+1;
+              return output;
+            }
           }
         }else{
           if(board.tiles[input.x][input.y-1].state == 'p' && board.tiles[input.x][input.y-1].player == state){
@@ -151,6 +161,18 @@ move allowedMove(board board, move input, bool isWhite){
             output.x = input.x;
             output.y = input.y-2;
             return output;
+          }else if(board.tiles[input.x][input.y].player == 1){
+            if (board.tiles[input.x+1][input.y-1].state == 'p' && board.tiles[input.x+1][input.y-1].player == state) {
+              board.tiles[input.x][input.y] = board.tiles[input.x+1][input.y-1];
+              output.x = input.x+1;
+              output.y = input.y-1;
+              return output;
+            }else if(board.tiles[input.x-1][input.y-1].state == 'p' && board.tiles[input.x-1][input.y-1].player == state){
+              board.tiles[input.x][input.y] = board.tiles[input.x-1][input.y-1];
+              output.x = input.x-1;
+              output.y = input.y-1;
+              return output;
+            }
           }
         }break;}
       case 'r':{
@@ -231,8 +253,6 @@ int main(){
       move.x = inputMove.at(1) - 97;
       move.y = inputMove.at(2) - 49;
     }else{std::cout << "input of the wrong lenght" << '\n'; moveAccepted =0;}
-
-    std::cout << move.state << move.x << move.y << '\n';
 
     if(moveAccepted == 1){
       moveReturn = allowedMove(board, move, is_white);

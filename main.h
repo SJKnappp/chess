@@ -11,13 +11,15 @@ struct move{
 
 struct peice{
   int player = 0; //not played = 0 black =1 white =2
-  bool moved = 0;
-  char state = ' ';
+  bool moved = 0; //detect first move
+  char state = ' '; //peice in question
 };
 
 struct board{
-  peice tiles[8][8];
-  std::vector<std::string> PGN;
+  peice tiles[8][8]; //array of board peices
+  std::vector<char> blackLost; //black peices lost
+  std::vector<char> whiteLost; //white peices lost
+  std::vector<std::string> PGN; //game history
 };
 
 
