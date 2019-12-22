@@ -1,5 +1,6 @@
 #include "main.h"
 
+//prints board state out
 void print(board board){
   Colour::Modifier blue(Colour::FG_BLUE);
   Colour::Modifier def(Colour::FG_DEFAULT);
@@ -43,6 +44,7 @@ void print(board board){
   }
 }
 
+//creats new board
 board intialise(){
   board newboard;
   //black
@@ -91,6 +93,7 @@ board intialise(){
   return newboard;
 }
 
+//checks move and intial and final position
 move allowedMove(board board, move input, bool isWhite){
   //moving pawns
 
@@ -161,22 +164,22 @@ move allowedMove(board board, move input, bool isWhite){
     return output;
 }
 
-board movePiece(board board, std::string start, std::string end){
-  int xb = start.at(0)-97;
-  int yb = start.at(1)-49;
-  int xn = end.at(0)-97;
-  int yn = end.at(1)-49;
+//moves the peices on the board
+board movePiece(board board, move start, move end){
 
-  board.tiles[xn][yn] = board.tiles[xb][yb];
-  board.tiles[xb][yb] = {}; board.tiles[xb][yb].state = ' ';
-  board.tiles[xn][yn].moved=1;
+  board.tiles[end.x][end.y] = board.tiles[start.x][start.y];
+  board.tiles[start.x][start.y] = {}; board.tiles[start.x][start.y].state = ' ';
+  board.tiles[end.x][end.y].moved=1;
   return board;
 }
 
+//contians main loop
 int main(){
   std::string isallowed;
   board board = intialise();
+  move moveReturn;
   move move;
+
   bool is_white = true;
   bool moveAccepted = true;
   print(board);
@@ -205,15 +208,12 @@ int main(){
     std::cout << move.state << move.x << move.y << '\n';
 
     if(moveAccepted == 1){
-      allowedMove(board, move, is_white);
+      moveReturn = allowedMove(board, move, is_white);
+      if(moveReturn.state == 'a'){
+        board = movePiece(board, moveReturn, move);
+      }
     }
 
-    /*if(move.size() < 4 && move.size() > 1){
-      isallowed = allowedMove(board, move, is_white);
-      if(isallowed == move){moveAccepted=0;}else{moveAccepted=1;
-        board = movePiece(board, isallowed, move);
-      }
-    }else{moveAccepted = false;}*/
     board.PGN.push_back(inputMove);
     if(moveAccepted==1){
       if(is_white == 0){is_white = 1;}else{is_white = 0;}
