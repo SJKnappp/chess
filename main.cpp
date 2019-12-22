@@ -113,6 +113,7 @@ std::string allowedMove(board board, std::string move, bool isWhite){
   }
   if(move.size() == 3){
     peice = move.at(0);
+    std::cout << peice << '\n';
     switch (peice) {
       case 'r':
       case 'n':
@@ -216,7 +217,7 @@ int main(){
       else{std::cout << "black" << '\n';}
     }else{std::cout << "please reenter your move" << '\n'; }
     std::cin >> move;
-    if(move.size() < 3 && move.size() > 1){
+    if(move.size() < 4 && move.size() > 1){
       isallowed = allowedMove(board, move, is_white);
       if(isallowed == move){moveAccepted=0;}else{moveAccepted=1;
         board = movePiece(board, isallowed, move);
