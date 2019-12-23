@@ -95,10 +95,10 @@ board intialise(){
 
   for(int i =0; i < 8; i++){
     for(int j = 0; j < 2; j++){
-      newboard.tiles[i][j].player = 1;
+      newboard.tiles[i][j].player = 2;
     }
     for(int j =6; j <8;j++){
-      newboard.tiles[i][j].player = 2;
+      newboard.tiles[i][j].player = 1;
     }
   }
   return newboard;
@@ -125,8 +125,18 @@ move allowedMove(board board, move input, bool isWhite){
     return input;
   }
   switch (input.state) {
+
       case 'p':{
-        if(isWhite == 1){
+        int lastx = -1, lasty=-1;
+        if (board.PGN.size() >0){
+        std::string lastmove = board.PGN.back();
+        if(lastmove.size() == 2){
+          lastx = lastmove.at(0) -97;
+          lasty = lastmove.at(1) -49;
+          std::cout << lastx << " " << lasty << " " << input.x << " " << input.y << '\n';
+        }
+      }
+        if(isWhite == 0){
           if(board.tiles[input.x][input.y+1].state == 'p' && board.tiles[input.x][input.y+1].player == state){
             board.tiles[input.x][input.y] = board.tiles[input.x][input.y+1];
             output.x = input.x;
@@ -149,6 +159,19 @@ move allowedMove(board board, move input, bool isWhite){
               output.y = input.y+1;
               return output;
             }
+          }else if(board.tiles[input.x][input.y].state == ' ' && board.tiles[input.x+1][input.y+1].state == 'p' && board.tiles[input.x][input.y+1].player == 2
+                      && lastx == input.x && lasty == input.y + 1 ){
+              board.tiles[input.x][input.y] = board.tiles[input.x-1][input.y+1];
+              output.x = input.x-1;
+              output.y = input.y+1;
+              return output;
+
+          }else if(board.tiles[input.x][input.y].state == ' ' && board.tiles[input.x-1][input.y+1].state == 'p' && board.tiles[input.x][input.y+1].player == 2
+                      && lastx == input.x && lasty == input.y + 1 ){
+              board.tiles[input.x][input.y] = board.tiles[input.x-1][input.y+1];
+              output.x = input.x-1;
+              output.y = input.y+1;
+              return output;
           }
         }else{
           if(board.tiles[input.x][input.y-1].state == 'p' && board.tiles[input.x][input.y-1].player == state){
@@ -172,6 +195,19 @@ move allowedMove(board board, move input, bool isWhite){
               output.x = input.x-1;
               output.y = input.y-1;
               return output;
+            }else if(board.tiles[input.x][input.y].state == ' ' && board.tiles[input.x+1][input.y-1].state == 'p' && board.tiles[input.x][input.y-1].player == 1
+                        && lastx == input.x && lasty == input.y - 1 ){
+                board.tiles[input.x][input.y] = board.tiles[input.x-1][input.y-1];
+                output.x = input.x-1;
+                output.y = input.y-1;
+                return output;
+
+            }else if(board.tiles[input.x][input.y].state == ' ' && board.tiles[input.x-1][input.y-1].state == 'p' && board.tiles[input.x][input.y-1].player == 1
+                        && lastx == input.x && lasty == input.y + 1 ){
+                board.tiles[input.x][input.y] = board.tiles[input.x-1][input.y-1];
+                output.x = input.x-1;
+                output.y = input.y+1;
+                return output;
             }
           }
         }break;}
