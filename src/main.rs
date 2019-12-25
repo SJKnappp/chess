@@ -1,7 +1,7 @@
 
 extern crate ansi_term;
 
-use ansi_term::Colour;
+use ansi_term::Colour::{Red, White};
 use std::{io, mem, vec, write};
     
 #[derive(Copy, Clone)]
@@ -65,21 +65,37 @@ impl Board {
     }
     fn print(&self){
         println!(" print line");
+        print!("    ");
+        let mut a = 'a' as u8;
+        
+        for i in 0..8{
+            print!("{}   ", a as char);
+            a+=1;
+        }
+        
+        println!("\n");
         
         for j in 0..8{
+            print!(" {}  ", j+1);
+        
             for i in 0..8{
-                //print!(" {} |", if self.tile[i][j].colour == 2 { Colour::Red.paint( self.tile[i][j].peice)} else { Colour::White.paint(self.tile[i][j].peice) },);
-                 //   string = 
-                //let strings: &[ANSIString<'static>] = &[
-                 //       if self.tile[i][j].colour == 2 { Colour::Red.paint(self.tile[i][j].peice)} else { Colour::White.paint(self.tile[i][j].peice) }, ];
-                        
-                print!("{}", strings);
-                    
+               print!("{} | ", if self.tile[i][j].colour == 1 { Red.paint(self.tile[i][j].peice.to_string()) } else { White.paint(self.tile[i][j].peice.to_string()) });                    
             }
-            println!("");
-            print!("--------------------------------");
+            print!("  {} \n", j+1 );
+            print!("    --------------------------------");
             println!("")
         }
+        
+        print!("    ");
+        a = 'a' as u8;
+        
+        for i in 0..8{
+            print!("{}   ", a as char);
+            a+=1;
+        }
+        
+        println!("\n")
+        
     }
 }
 
