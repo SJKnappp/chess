@@ -2,8 +2,14 @@
 extern crate ansi_term;
 
 use ansi_term::Colour::{Red, White};
-use std::{io, mem, vec, write};
-    
+use std::{io};
+ 
+struct Displace{
+    peice : char,
+    x : u8,
+    y : u8,
+}
+ 
 #[derive(Copy, Clone)]
 struct Piece{
     peice : char, // 
@@ -13,6 +19,7 @@ struct Piece{
 
 struct Board{
     tile :  [[Piece; 8]; 8],
+    player : bool, //false black true whtie
 }
 
 impl Board {
@@ -60,11 +67,11 @@ impl Board {
         }
         
         
-        let board = Board { tile: temp,};
+        let board = Board { tile: temp, player : true,};
         return board;
     }
     fn print(&self){
-        println!(" print line");
+
         print!("    ");
         let mut a = 'a' as u8;
         
@@ -103,16 +110,22 @@ fn main() {
     
     let running = true;
     let board = Board::new();
+    let mut moveAccepted = true;
     board.print();
     
     while running {
-        //output;
+        if moveAccepted == true{
+            println!("player: {} please make your move", if board.player == true { "white " }else {" black"});
+        }else{println!("please reenter your move"); moveAccepted = true;}
         
-        println!("name: ");
-        let mut name = String::new();
-        io::stdin().read_line(&mut name).expect("Failed to read line");
+        let mut play = String::new();
+        io::stdin().read_line(&mut play).expect("Failed to read line");
+        if(play.len() == 3){
+            
+        }else if( play.len() == 4){
         
-        println!("{}", name);
+        }else{moveAccepted = false;}
+        
         
         
     }
