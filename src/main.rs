@@ -106,30 +106,50 @@ impl Board {
     }
 }
 
+fn checkallowed(){}
+
 fn main() {
     
     let running = true;
-    let board = Board::new();
+    let mut board = Board::new();
     let mut moveAccepted = true;
-    board.print();
+    let mut turn = Displace {peice : ' ', x : 9, y : 9};
     
     while running {
         if moveAccepted == true{
-            println!("player: {} please make your move", if board.player == true { "white " }else {" black"});
+            if board.player == true{board.player = false;}else{board.player = true;}
+            board.print();
+            println!("player: {} please make your move \n", if board.player == true { "white " }else {" black"});
         }else{println!("please reenter your move"); moveAccepted = true;}
-        
         let mut play = String::new();
-        io::stdin().read_line(&mut play).expect("Failed to read line");
-        if(play.len() == 3){
+        io::stdin().read_line(&mut play).unwrap();
+        play = play.trim().to_string();
+        
+        println!("!{}!", play);
+       
+        
+        if play.len() == 2{
+            turn.peice = 'p';
+            turn.x = play.as_bytes()[0] as u8; turn.x -= 97;
+            turn.y = play.as_bytes()[1] as u8; turn.y -= 49;
             
-        }else if( play.len() == 4){
-        
-        }else{moveAccepted = false;}
-        
+            if  turn.x <= 7 && turn.y <= 7 {
+            
+            }else{moveAccepted = false;}
+            
+        }else if play.len() == 3{
+            turn.peice = play.as_bytes()[0] as char;
+            turn.x = play.as_bytes()[1] as u8; turn.x -= 97;
+            turn.y = play.as_bytes()[2] as u8; turn.y -= 49;
+            
+            if turn.x <= 7 && turn.y <= 7 && (turn.peice == 'r' || turn.peice == 'n' || turn.peice == 'b' || turn.peice == 'q' || turn.peice == 'k' ){
+            
+            }else{moveAccepted = false;}
+        }else if play == "exit"{ break; }
+        else{moveAccepted = false;}
         
         
     }
-    
-    
+
     println!("Hello, world!");
 }
