@@ -130,16 +130,28 @@ impl Board {
     }
     //takes start and end point and kills and moves the peices
     fn Swap(mut self, Final : &Displace, intial : &Displace) -> Board{
+        println!("swap");
         if self.tile[Final.x as usize][Final.y as usize].colour == 1{
                 self.takenWhite.push( self.tile[Final.x as usize][Final.y as usize].peice );
         } else if self.tile[Final.x as usize][Final.y as usize].colour == 2{
                 self.takenBlack.push( self.tile[Final.x as usize][Final.y as usize].peice );
+        } else if intial.peice == 'S' {//self.tile[Final.x as usize][Final.y as usize].colour == 0 {
+            if self.tile[intial.x as usize][intial.y as usize].colour == 1{
+                self.takenWhite.push( self.tile[Final.x as usize][(Final.y as i8 + 1) as usize].peice );
+                self.tile[Final.x as usize][(Final.y as i8 +1) as usize].peice = ' ';
+                self.tile[Final.x as usize][(Final.y as i8 +1) as usize].colour = 0 ;
+            }else if  self.tile[intial.x as usize][intial.y as usize].colour == 2 {
+                self.takenBlack.push( self.tile[Final.x as usize][(Final.y as i8 + 1) as usize].peice );
+                self.tile[Final.x as usize][(Final.y as i8 -1) as usize].peice = ' ';
+                self.tile[Final.x as usize][(Final.y as i8 -1) as usize].colour = 0 ;
+            }
         }
     
         self.tile[Final.x as usize][Final.y as usize].peice = self.tile[intial.x as usize][intial.y as usize].peice;
         self.tile[Final.x as usize][Final.y as usize].colour = self.tile[intial.x as usize][intial.y as usize].colour;
         self.tile[intial.x as usize][intial.y as usize].peice = ' ';
         self.tile[intial.x as usize][intial.y as usize].colour = 0 ;
+        
         return self;
     }
 }
