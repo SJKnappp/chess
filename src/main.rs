@@ -145,18 +145,29 @@ impl Board {
 fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     let mut startPos = Displace{peice : 'f', x : 8, y : 8};
     let player : u8;
+    let openent : u8;
     let direc : i8;
-    if board.player == false {player = 1;} else { player = 2;}
+    if board.player == false {player = 1; openent = 2;} else { player = 2; openent = 1;}
     
     if endPos.peice == 'p' {
         if board.player == false{direc = 1;}else{direc = -1;} //direc looking backtowards start pos
         
         if board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].colour == player{
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + direc) as u8;
-        }else if board.tile[endPos.x as usize][(endPos.y as i8 + 2 * direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' '  && 
-        board.tile[endPos.x as usize][(endPos.y as i8 + 2 *     direc)as usize].colour == player{
-            startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + 2 * direc) as u8;
-        }
+        } //move one foward
+        else if board.tile[endPos.x as usize][(endPos.y as i8 + 2 * direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' '  && 
+        board.tile[endPos.x as usize][(endPos.y as i8 + 2 *  direc)as usize].colour == player{
+            startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + 2 *  direc) as u8;
+        } //move two foward
+        else if board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].colour == openent  && 
+        board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].colour == player{
+            startPos.peice = 's'; startPos.x = endPos.x + 1; startPos.y = (endPos.y as i8 + direc) as u8;
+        } //takes left
+        else if board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].colour == openent  && 
+        board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].colour == player{
+            startPos.peice = 's'; startPos.x = endPos.x - 1; startPos.y = (endPos.y as i8 + direc) as u8;
+        } //take right
+        
         
     }
     else if endPos.peice == 'r' {}
