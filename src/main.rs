@@ -154,7 +154,7 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
         if board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' '{
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + direc) as u8;
         }
-        
+         
     }
     else if endPos.peice == 'r' {}
     else if endPos.peice == 'n' {}
