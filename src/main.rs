@@ -4,6 +4,7 @@ extern crate ansi_term;
 use ansi_term::Colour::{Red, White};
 use std::{io};
  
+#[derive(Copy, Clone)]
 struct Displace{
     peice : char, //stores the peice being moved and the susses of the return value
     x : u8, //stores coords
@@ -22,6 +23,7 @@ struct Board{
     player : bool, //false black true whtie
     takenWhite : Vec<char>, //holds pieces taken by black
     takenBlack : Vec<char>, //hold pieces taken by white
+    History : Vec<Displace>, //move histroy
 }
 
 impl Board {
@@ -71,7 +73,7 @@ impl Board {
         }
         
         
-        let board = Board { tile: temp, player : false, takenWhite : Vec::new(), takenBlack : Vec::new()};
+        let board = Board { tile: temp, player : false, takenWhite : Vec::new(), takenBlack : Vec::new(), History : Vec::new(), };
         return board;
     }
     //prints out the board
@@ -156,7 +158,8 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + direc) as u8;
         } //move one foward
         else if board.tile[endPos.x as usize][(endPos.y as i8 + 2 * direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' '  && 
-        board.tile[endPos.x as usize][(endPos.y as i8 + 2 *  direc)as usize].colour == player{
+        board.tile[endPos.x as usize][(endPos.y as i8 + direc) as usize].peice == ' ' && board.tile[endPos.x as usize][(endPos.y as i8 + 2 *  direc)as usize].colour == player
+        && ((endPos.y == 3 && player == 2) || (endPos.y == 4 && player == 1)){
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + 2 *  direc) as u8;
         } //move two foward
         else if board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].colour == openent  && 
@@ -225,6 +228,7 @@ fn main() {
         
         if moveAccepted == true {
             board = board.Swap(&turn, &end);
+            board.History.push(turn);
             
         }
               
