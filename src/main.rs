@@ -5,7 +5,7 @@ use ansi_term::Colour::{Red, White};
 use std::{io};
  
 struct Displace{
-    peice : char, //stores the peice being moved
+    peice : char, //stores the peice being moved and the susses of the return value
     x : u8, //stores coords
     y : u8, //stores coords
 }
@@ -142,8 +142,28 @@ impl Board {
     }
 }
 
-fn checkallowed() -> Displace{
-
+fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
+    let mut startPos = Displace{peice : 'f', x : 8, y : 8};
+    let player : u8;
+    let direc : i8;
+    if board.player == false {player = 1;} else { player = 2;}
+    
+    if endPos.peice == 'p' {
+        if board.player == false{direc = 1;}else{direc = -1;} //direc looking backtowards start pos
+        
+        if board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' '{
+            startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + direc) as u8;
+        }
+        
+    }
+    else if endPos.peice == 'r' {}
+    else if endPos.peice == 'n' {}
+    else if endPos.peice == 'b' {}
+    else if endPos.peice == 'q' {}
+    else if endPos.peice == 'k' {}
+    else {startPos.peice = 'f'}
+    
+    return startPos;
 }
 
 fn main() {
@@ -152,7 +172,7 @@ fn main() {
     let mut board = Board::new();
     let mut moveAccepted = true;
     let mut turn = Displace {peice : ' ', x : 9, y : 9};
-    let test = Displace {peice: ' ', x:1, y: 1};
+    let mut end = Displace {peice: ' ', x:1, y: 1};
     
     while running {
         if moveAccepted == true{
@@ -184,10 +204,14 @@ fn main() {
         }else if play == "exit"{ break; }
         else{moveAccepted = false;}
         
-        
+        if moveAccepted == true {
+            end = checkallowed(&board, &turn);
+            if end.peice == 'f' {moveAccepted = false; println!("move not allowed");}
+        }
         
         if moveAccepted == true {
-            board = board.Swap(&turn, &test);
+            board = board.Swap(&turn, &end);
+            
         }
               
         
