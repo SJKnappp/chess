@@ -20,8 +20,8 @@ struct Piece{
 struct Board{
     tile :  [[Piece; 8]; 8], //stores board state
     player : bool, //false black true whtie
-    takenWhite : Vec<char>,
-    takenBlack : Vec<char>,
+    takenWhite : Vec<char>, //holds pieces taken by black
+    takenBlack : Vec<char>, //hold pieces taken by white
 }
 
 impl Board {
@@ -76,6 +76,16 @@ impl Board {
     }
     //prints out the board
     fn print(&self){
+    
+        for i in 0..self.takenBlack.len(){
+            print!("Black taken: {}", self.takenBlack[i]);
+        }
+        println!("");
+        for i in 0..self.takenWhite.len(){
+            print!("white taken: {}", self.takenWhite[i]);
+        }
+        
+        println!(" ");
 
         print!("    ");
         let mut a = 'a' as u8;
@@ -94,6 +104,7 @@ impl Board {
                print!("{} | ", if self.tile[i][j].colour == 1 { Red.paint(self.tile[i][j].peice.to_string()) } else { White.paint(self.tile[i][j].peice.to_string()) });                    
             }
             print!("  {} \n", j+1 );
+        
             print!("    --------------------------------");
             println!("")
         }
