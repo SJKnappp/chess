@@ -151,10 +151,13 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     if endPos.peice == 'p' {
         if board.player == false{direc = 1;}else{direc = -1;} //direc looking backtowards start pos
         
-        if board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' '{
+        if board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].colour == player{
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + direc) as u8;
+        }else if board.tile[endPos.x as usize][(endPos.y as i8 + 2 * direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' '  && 
+        board.tile[endPos.x as usize][(endPos.y as i8 + 2 *     direc)as usize].colour == player{
+            startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + 2 * direc) as u8;
         }
-         
+        
     }
     else if endPos.peice == 'r' {}
     else if endPos.peice == 'n' {}
