@@ -5,9 +5,9 @@ use ansi_term::Colour::{Red, White};
 use std::{io};
  
 struct Displace{
-    peice : char,
-    x : u8,
-    y : u8,
+    peice : char, //stores the peice being moved
+    x : u8, //stores coords
+    y : u8, //stores coords
 }
  
 #[derive(Copy, Clone)]
@@ -142,7 +142,9 @@ impl Board {
     }
 }
 
-fn checkallowed(){}
+fn checkallowed() -> Displace{
+
+}
 
 fn main() {
     
