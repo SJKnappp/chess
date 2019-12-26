@@ -12,17 +12,21 @@ struct Displace{
  
 #[derive(Copy, Clone)]
 struct Piece{
-    peice : char, // 
+    peice : char, //stores the peice r rock n knight b bishop q queen k king p pawn
     colour : u8, //0 no specify 1 black 2 white
-    moved : bool,
+    moved : bool, //detects peices first move
 }
 
 struct Board{
-    tile :  [[Piece; 8]; 8],
+    tile :  [[Piece; 8]; 8], //stores board state
     player : bool, //false black true whtie
+    takenWhite : Vec<char>,
+    takenBlack : Vec<char>,
 }
 
 impl Board {
+
+    //creats a standards board layout
     fn new() -> Board{
         let mut temp = [[Piece{peice: ' ', colour : 0, moved : false};8];8];
         
@@ -67,9 +71,10 @@ impl Board {
         }
         
         
-        let board = Board { tile: temp, player : true,};
+        let board = Board { tile: temp, player : false, takenWhite : Vec::new(), takenBlack : Vec::new()};
         return board;
     }
+    //prints out the board
     fn print(&self){
 
         print!("    ");
@@ -104,6 +109,26 @@ impl Board {
         println!("\n")
         
     }
+    //checks if playing on own colour
+    fn checkColour(&self, Move : &Displace) -> bool{
+        if self.player == true && self.tile[Move.x as usize][Move.y as usize].colour == 2 { return false; }
+        else if self.player == false && self.tile[Move.x as usize][Move.y as usize].colour == 1 { return false; }
+        return true;
+    }
+    //takes start and end point and kills and moves the peices
+    fn Swap(mut self, Final : &Displace, intial : &Displace) -> Board{
+        if self.tile[Final.x as usize][Final.y as usize].colour == 1{
+                self.takenWhite.push( self.tile[Final.x as usize][Final.y as usize].peice );
+        } else if self.tile[Final.x as usize][Final.y as usize].colour == 2{
+                self.takenBlack.push( self.tile[Final.x as usize][Final.y as usize].peice );
+        }
+    
+        self.tile[Final.x as usize][Final.y as usize].peice = self.tile[intial.x as usize][intial.y as usize].peice;
+        self.tile[Final.x as usize][Final.y as usize].colour = self.tile[intial.x as usize][intial.y as usize].colour;
+        self.tile[intial.x as usize][intial.y as usize].peice = ' ';
+        self.tile[intial.x as usize][intial.y as usize].colour = 0 ;
+        return self;
+    }
 }
 
 fn checkallowed(){}
@@ -114,6 +139,7 @@ fn main() {
     let mut board = Board::new();
     let mut moveAccepted = true;
     let mut turn = Displace {peice : ' ', x : 9, y : 9};
+    let test = Displace {peice: ' ', x:1, y: 1};
     
     while running {
         if moveAccepted == true{
@@ -124,17 +150,14 @@ fn main() {
         let mut play = String::new();
         io::stdin().read_line(&mut play).unwrap();
         play = play.trim().to_string();
-        
-        println!("!{}!", play);
-       
-        
+            
         if play.len() == 2{
             turn.peice = 'p';
             turn.x = play.as_bytes()[0] as u8; turn.x -= 97;
             turn.y = play.as_bytes()[1] as u8; turn.y -= 49;
             
             if  turn.x <= 7 && turn.y <= 7 {
-            
+                moveAccepted = board.checkColour(&turn)
             }else{moveAccepted = false;}
             
         }else if play.len() == 3{
@@ -143,11 +166,17 @@ fn main() {
             turn.y = play.as_bytes()[2] as u8; turn.y -= 49;
             
             if turn.x <= 7 && turn.y <= 7 && (turn.peice == 'r' || turn.peice == 'n' || turn.peice == 'b' || turn.peice == 'q' || turn.peice == 'k' ){
-            
+                moveAccepted = board.checkColour(&turn)
             }else{moveAccepted = false;}
         }else if play == "exit"{ break; }
         else{moveAccepted = false;}
         
+        
+        
+        if moveAccepted == true {
+            board = board.Swap(&turn, &test);
+        }
+              
         
     }
 
