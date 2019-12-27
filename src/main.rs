@@ -131,7 +131,7 @@ impl Board {
     }
     //takes start and end point and kills and moves the peices
     fn Swap(mut self, Final : &Displace, intial : &Displace) -> Board{
-        println!("swap {}", self.tile[Final.x as usize][(Final.y as i8 - 1) as usize].peice);
+     
         if self.tile[Final.x as usize][Final.y as usize].colour == 1{
                 self.takenWhite.push( self.tile[Final.x as usize][Final.y as usize].peice );
         } else if self.tile[Final.x as usize][Final.y as usize].colour == 2{
@@ -178,15 +178,13 @@ impl Board {
 }
 
 fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
+    
     let mut startPos = Displace{peice : 'f', x : 8, y : 8};
     let player : u8;
     let openent : u8;
     let direc : i8;
     if board.player == false {player = 1; openent = 2;} else { player = 2; openent = 1;}
-    print!("{} {} {} \n", endPos.peice, endPos.x , endPos.y);
-    if board.History.len() > 0{
-    print!("{} {} {}", board.History[board.History.len() - 1].peice , board.History[board.History.len() - 1].x , board.History[board.History.len() - 1].y );
-    }
+  
     if endPos.peice == 'p' {
         if board.player == false{direc = 1;}else{direc = -1;} //direc looking backtowards start pos
         print!("{}", direc);
@@ -235,28 +233,36 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     }//rook allowed
     
     else if endPos.peice == 'n' {
-      if if endPos.x + 1 < 8 && endPos.y + 2 < 8{ board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'n'} else {true == false} {
+      if if endPos.x + 1 < 8 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'n'} else {true == false} {
+        print!("1");
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 + 1) as u8; startPos.y = (endPos.y as i8 + 2) as u8;
       }
-      else if if endPos.y + 2 < 8 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'n'} else {true == false} {
+      else if if endPos.x as i8 - 1 >= 0 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'n'} else {true == false} {
+        print!("2 ");
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = (endPos.y as i8 + 2) as u8;
       }
-      else if if endPos.x + 1 < 8 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'n'} else {true == false} {
+      else if if endPos.x + 1 < 8 && endPos.y as i8 - 2 >= 0 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'n'} else {true == false} {
+        print!("3");
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 + 1) as u8; startPos.y = (endPos.y as i8 - 2) as u8;
       }
-      else if board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'n'{
-        startPos.peice = 'n'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = (endPos.y as i8 - 2) as u8;
+      else if if endPos.x as i8 - 1 >= 0 && endPos.y as i8 - 2 >= 0 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'n'} else {true == false} {
+        print!("4");
+        startPos.peice = 'n'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = (endPos.y as i8 - 2) as u8 ;
       }
       else if if endPos.x + 2 < 8 && endPos.y + 1 < 8 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'n'} else {true == false} {
+        print!("5");
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 + 2) as u8; startPos.y = (endPos.y as i8 + 1) as u8;
       }
-      else if if endPos.x + 2 < 8 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'n'} else {true == false} {
+      else if if endPos.x + 2 < 8 && endPos.y as i8 - 1 >= 0 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'n'} else {true == false} {
+        print!("6");
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 + 2) as u8; startPos.y = (endPos.y as i8 - 1) as u8;
       }
-      else if if endPos.y + 1 < 8 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'n'} else {true == false} {
+      else if if endPos.x as i8 - 2 >= 0 && endPos.y + 1 < 8 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'n'} else {true == false} {
+        print!("7");
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 - 2) as u8; startPos.y = (endPos.y as i8 + 1) as u8;
       }
-      else if board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'n' {
+      else if if endPos.x as i8 - 2 >= 0 && endPos.y as i8 - 1 >= 0 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'n'} else { true == false} {
+        print!("8");
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 - 2) as u8; startPos.y = (endPos.y as i8 - 1) as u8;
       }
     }//knight allowed
