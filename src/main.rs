@@ -253,7 +253,7 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
                 }else {checkR = false}
             }else{checkR = false}//Right
             
-            if checkL == true && endPos.x - i > 0 {
+            if checkL == true && endPos.x - i >= 0 {
                 if board.tile[(endPos.x - i) as usize][endPos.y as usize].peice == ' ' {}
                 else if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == 'r' && board.tile[(endPos.x - i) as usize][(endPos.y+i) as usize].colour == player{
                      startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = endPos.y;
