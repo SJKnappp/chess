@@ -30,6 +30,8 @@ impl Board {
 
     //creats a standards board layout
     fn new() -> Board{
+    
+        //creates an array of the board
         let mut temp = [[Piece{peice: ' ', colour : 0, moved : false};8];8];
         
         temp[0][0].peice = 'r';
@@ -65,6 +67,7 @@ impl Board {
         temp[6][7].peice = 'n';
         temp[7][7].peice = 'r';
         
+        //loops and set colour
         for j in 0..2{
             for i in 0..8{
                 temp[i][j].colour = 2;
@@ -72,7 +75,7 @@ impl Board {
             }
         }
         
-        
+        //creats the board
         let board = Board { tile: temp, player : false, takenWhite : Vec::new(), takenBlack : Vec::new(), History : Vec::new(), };
         return board;
     }
@@ -81,20 +84,18 @@ impl Board {
         
         print!("Black taken: ");
         for i in 0..self.takenBlack.len(){
-            print!("{}", self.takenBlack[i]);
+            print!("{}", self.takenBlack[i]); //list the peices black has taken
         }
         print!("\nWhite taken: ");
         for i in 0..self.takenWhite.len(){
-            print!("{}", self.takenWhite[i]);
+            print!("{}", self.takenWhite[i]); //lists the peices white has taken
         }
         
-        println!(" ");
-
-        print!("    ");
-        let mut a = 'a' as u8;
+        print!("\n    "); //sets intial displacment of the coords print out
         
+        let mut a = 'a' as u8; //stores interger value of a to loop through
         for i in 0..8{
-            print!("{}   ", a as char);
+            print!("{}   ", a as char); // prints the letter
             a+=1;
         }
         
@@ -104,11 +105,11 @@ impl Board {
             print!(" {}  ", j+1);
         
             for i in 0..8{
-               print!("{} | ", if self.tile[i][j].colour == 1 { Red.paint(self.tile[i][j].peice.to_string()) } else { White.paint(self.tile[i][j].peice.to_string()) });                    
+               print!("{} | ", if self.tile[i][j].colour == 1 { Red.paint(self.tile[i][j].peice.to_string()) } else { White.paint(self.tile[i][j].peice.to_string()) }); //prints out board state                    
             }
             print!("  {} \n", j+1 );
         
-            print!("    --------------------------------");
+            print!("    --------------------------------"); //seperates the board with a line
             println!("")
         }
         
@@ -116,7 +117,7 @@ impl Board {
         a = 'a' as u8;
         
         for i in 0..8{
-            print!("{}   ", a as char);
+            print!("{}   ", a as char); // prints bottom row coordinates
             a+=1;
         }
         
@@ -125,21 +126,21 @@ impl Board {
     }
     //checks if playing on own colour
     fn checkColour(&self, Move : &Displace) -> bool{
-        if self.player == true && self.tile[Move.x as usize][Move.y as usize].colour == 2 { return false; }
-        else if self.player == false && self.tile[Move.x as usize][Move.y as usize].colour == 1 { return false; }
+        if self.player == true && self.tile[Move.x as usize][Move.y as usize].colour == 2 { return false; }  
+        else if self.player == false && self.tile[Move.x as usize][Move.y as usize].colour == 1 { return false; } 
         return true;
     }
     //takes start and end point and kills and moves the peices
     fn Swap(mut self, Final : &Displace, intial : &Displace) -> Board{
      
-        if self.tile[Final.x as usize][Final.y as usize].colour == 1{
+        if self.tile[Final.x as usize][Final.y as usize].colour == 1{ //adds taken peices to taken history
                 self.takenWhite.push( self.tile[Final.x as usize][Final.y as usize].peice );
         } else if self.tile[Final.x as usize][Final.y as usize].colour == 2{
                 self.takenBlack.push( self.tile[Final.x as usize][Final.y as usize].peice );
-        } else if intial.peice == 'S' {//self.tile[Final.x as usize][Final.y as usize].colour == 0 {
+        } else if intial.peice == 'S' {//detects en passont to take peice thats not being landed on
             if self.tile[intial.x as usize][intial.y as usize].colour == 2{
                 self.takenWhite.push( self.tile[Final.x as usize][(Final.y as i8 - 1) as usize].peice );
-                self.tile[Final.x as usize][(Final.y as i8 -1) as usize].peice = ' ';
+                self.tile[Final.x as usize][(Final.y as i8 -1) as usize].peice = ' '; //removes peice
                 self.tile[Final.x as usize][(Final.y as i8 -1) as usize].colour = 0 ;
             }else if  self.tile[intial.x as usize][intial.y as usize].colour == 1 {
                 self.takenBlack.push( self.tile[Final.x as usize][(Final.y as i8 + 1) as usize].peice );
@@ -148,15 +149,15 @@ impl Board {
             }
         }
         
-        if Final.y == 7 && Final.peice =='p'{
+        if (Final.y == 7 || Final.y == 0 )&& Final.peice =='p'{ //premottes pawn
             println!("pawn premotted please select replacement");
             let mut sucsses = true;
-            while(sucsses == true) {
+            while(sucsses == true) { //waits till pawn prommotion sucseful before moving on
             let mut select = String::new();
-            io::stdin().read_line(&mut select).unwrap();
+            io::stdin().read_line(&mut select).unwrap(); //takes an input
             select = select.trim().to_string();
             if select.len() == 1{ 
-                match select.as_ref(){
+                match select.as_ref(){ //swaps peice
                     "n" => self.tile[intial.x as usize][intial.y as usize].peice = 'n',
                     "r" => self.tile[intial.x as usize][intial.y as usize].peice = 'r',
                     "b" => self.tile[intial.x as usize][intial.y as usize].peice = 'b',
@@ -164,25 +165,26 @@ impl Board {
                     _ => println!("please select ether q r b q"),
                 }
             }
-            if self.tile[intial.x as usize][intial.y as usize].peice != 'p' { break; }
+            if self.tile[intial.x as usize][intial.y as usize].peice != 'p' { break; } //if peices changed break out of loop
             }
         }
-    
-        self.tile[Final.x as usize][Final.y as usize].peice = self.tile[intial.x as usize][intial.y as usize].peice;
+        
+        self.tile[Final.x as usize][Final.y as usize].peice = self.tile[intial.x as usize][intial.y as usize].peice; //moves peice
         self.tile[Final.x as usize][Final.y as usize].colour = self.tile[intial.x as usize][intial.y as usize].colour;
-        self.tile[intial.x as usize][intial.y as usize].peice = ' ';
+        self.tile[intial.x as usize][intial.y as usize].peice = ' '; //resets original point
         self.tile[intial.x as usize][intial.y as usize].colour = 0 ;
         
         return self;
     }
 }
 
+//checks allowed move for queen bishop and rook
 fn checkQMB(board : &Board, mut startPos : Displace, endPos : &Displace, mut player : u8, mut peice : char, mut checkU : bool, mut checkD : bool, mut checkL : bool, mut checkR : bool, mut checkNE : bool, mut checkSE : bool, mut checkSW : bool, mut checkNW : bool) -> Displace {
     for i in 0..8{
             if checkU == true && endPos.y + i < 8 {
-                if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == ' ' {}
-                else if board.tile[endPos.x as usize][(endPos.y+i )as usize].peice == peice && board.tile[endPos.x as usize][(endPos.y+i) as usize].colour == player {
-                     startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y + i) as u8;
+                if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == ' ' {} //pass on if empty tile
+                else if board.tile[endPos.x as usize][(endPos.y+i )as usize].peice == peice && board.tile[endPos.x as usize][(endPos.y+i) as usize].colour == player { //checks that direction equual to peice and colour
+                     startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y + i) as u8; //intial location of peice
                 }else {checkU = false}
             }else{checkU = false}//Up
             
@@ -352,63 +354,60 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     return startPos;
 }
 
+//main function
 fn main() {
     
+    //intialise variables
     let running = true;
     let mut board = Board::new();
     let mut moveAccepted = true;
     let mut turn = Displace {peice : ' ', x : 9, y : 9};
     let mut end = Displace {peice: ' ', x:1, y: 1};
     
-    while running {
+    while running { //main loop
         if moveAccepted == true{
-            if board.player == true{board.player = false;}else{board.player = true;}
+            if board.player == true{board.player = false;}else{board.player = true;} //player
             board.print();
-            print!("player: {} please make your move:  \n", if board.player == true { "white" }else {"black"});
-        }else{println!("please reenter your move"); moveAccepted = true;}
+            print!("player: {} please make your move:  \n", if board.player == true { "white" }else {"black"}); //player turn
+        }else{println!("please reenter your move"); moveAccepted = true;} //reinput turn if not allowed
         let mut play = String::new();
-        io::stdin().read_line(&mut play).unwrap();
+        io::stdin().read_line(&mut play).unwrap(); //input move
         play = play.trim().to_string();
             
-        if play.len() == 2{
+        if play.len() == 2{ //checks if pawn as input 2 long
             turn.peice = 'p';
             turn.x = play.as_bytes()[0] as u8; turn.x -= 97;
             turn.y = play.as_bytes()[1] as u8; turn.y -= 49;
             
-            if  turn.x <= 7 && turn.y <= 7 {
+            if  turn.x <= 7 && turn.y <= 7 { //checks played inside board
                 moveAccepted = board.checkColour(&turn)
             }else{moveAccepted = false;}
             
-        }else if play.len() == 3{
+        }else if play.len() == 3{ //checks play lengh
             turn.peice = play.as_bytes()[0] as char;
             turn.x = play.as_bytes()[1] as u8; turn.x -= 97;
             turn.y = play.as_bytes()[2] as u8; turn.y -= 49;
             
-            if turn.x <= 7 && turn.y <= 7 && (turn.peice == 'r' || turn.peice == 'n' || turn.peice == 'b' || turn.peice == 'q' || turn.peice == 'k' ){
+            if turn.x <= 7 && turn.y <= 7 && (turn.peice == 'r' || turn.peice == 'n' || turn.peice == 'b' || turn.peice == 'q' || turn.peice == 'k' ){ //checks allowed 
                 moveAccepted = board.checkColour(&turn)
             }else{moveAccepted = false;}
         }else if play == "exit"{ break; }
         else{moveAccepted = false;}
         
-        if board.tile[turn.x as usize][turn.y as usize].peice == 'k'{
+        if board.tile[turn.x as usize][turn.y as usize].peice == 'k'{ //checks if king is being taken
             println!("cannot take the king");
             moveAccepted = false;
         }
         
-        if moveAccepted == true {
+        if moveAccepted == true { //runs peices check
             end = checkallowed(&board, &turn);
             if end.peice == 'f' {moveAccepted = false; println!("move not allowed");}
         }
         
-        if moveAccepted == true {
-                        
+        if moveAccepted == true { //moves the peices 
             board = board.Swap(&turn, &end);
-            board.History.push(turn);
-            
+            board.History.push(turn);            
         }
-              
-        
     }
-
     println!("Hello, world!");
 }
