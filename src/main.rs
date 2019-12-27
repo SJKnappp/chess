@@ -177,6 +177,67 @@ impl Board {
     }
 }
 
+fn checkQMB(board : &Board, mut startPos : Displace, endPos : &Displace, mut player : u8, mut peice : char, mut checkU : bool, mut checkD : bool, mut checkL : bool, mut checkR : bool, mut checkNE : bool, mut checkSE : bool, mut checkSW : bool, mut checkNW : bool) -> Displace {
+    for i in 0..8{
+            if checkU == true && endPos.y + i < 8 {
+                if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == ' ' {}
+                else if board.tile[endPos.x as usize][(endPos.y+i )as usize].peice == peice && board.tile[endPos.x as usize][(endPos.y+i) as usize].colour == player {
+                     startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y + i) as u8;
+                }else {checkU = false}
+            }else{checkU = false}//Up
+            
+            if checkD == true && endPos.y as i8 - i as i8>= 0 {
+                if board.tile[endPos.x as usize][(endPos.y-i) as usize].peice == ' ' {}
+                else if board.tile[endPos.x as usize][(endPos.y-i) as usize].peice == peice && board.tile[endPos.x as usize][(endPos.y-i) as usize].colour == player {
+                     startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y - i) as u8;
+                }else {checkD = false}
+            }else{checkD = false}//Down
+            
+            if checkR == true && endPos.x + i < 8 {
+                if board.tile[(endPos.x + i) as usize][endPos.y as usize].peice == ' ' {}
+                else if board.tile[(endPos.x+i) as usize][endPos.y as usize].peice == peice && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player {
+                     startPos.peice = 's'; startPos.x = (endPos.x + i) as u8; startPos.y = endPos.y;
+                }else {checkR = false}
+            }else{checkR = false}//Right
+            
+            if checkL == true && endPos.x as i8 - i as i8 >= 0 {
+                if board.tile[(endPos.x - i) as usize][endPos.y as usize].peice == ' ' {}
+                else if board.tile[(endPos.x-i) as usize][endPos.y as usize].peice == peice && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player{
+                     startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = endPos.y;
+                }else {checkL = false}
+            }else{checkL = false}//Left
+            
+            if checkNE == true && endPos.x as i8 + i as i8 >= 0 && endPos.y as i8 + i as i8 >= 0 {
+                if board.tile[(endPos.x - i) as usize][endPos.y as usize].peice == ' ' {}
+                else if board.tile[(endPos.x-i) as usize][endPos.y as usize].peice == peice && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player{
+                     startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = endPos.y;
+                }else {checkL = false}
+            }else{checkNE = false}//NE
+            
+            if checkSE == true && endPos.x as i8 + i as i8 >= 0 && endPos.y as i8 - i as i8 >= 0 {
+                if board.tile[(endPos.x - i) as usize][endPos.y as usize].peice == ' ' {}
+                else if board.tile[(endPos.x-i) as usize][endPos.y as usize].peice == peice && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player{
+                     startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = endPos.y;
+                }else {checkL = false}
+            }else{checkSE = false}//SE
+            
+            if checkSW == true && endPos.x as i8 - i as i8 >= 0 && endPos.y as i8 - i as i8 >= 0 {
+                if board.tile[(endPos.x - i) as usize][endPos.y as usize].peice == ' ' {}
+                else if board.tile[(endPos.x-i) as usize][endPos.y as usize].peice == peice && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player{
+                     startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = endPos.y;
+                }else {checkL = false}
+            }else{checkSW = false}//SW
+            
+            if checkNW == true && endPos.x as i8 - i as i8 >= 0 && endPos.y as i8 + i as i8 >= 0{
+                if board.tile[(endPos.x - i) as usize][endPos.y as usize].peice == ' ' {}
+                else if board.tile[(endPos.x-i) as usize][endPos.y as usize].peice == peice && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player{
+                     startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = endPos.y;
+                }else {checkL = false}
+            }else{checkNW = false}//NW
+        }
+    return startPos;
+}
+
 fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     
     let mut startPos = Displace{peice : 'f', x : 8, y : 8};
@@ -231,35 +292,7 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     
     else if endPos.peice == 'r' {
     let mut checkU = true; let mut checkD = true; let mut checkL = true; let mut checkR = true;
-        for i in 0..8{
-            if checkU == true && endPos.y + i < 8 {
-                if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == ' ' {}
-                else if board.tile[endPos.x as usize][(endPos.y+i )as usize].peice == 'r' && board.tile[endPos.x as usize][(endPos.y+i) as usize].colour == player {
-                     startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y + i) as u8;
-                }else {checkU = false}
-            }else{checkU = false}//Up
-            
-            if checkD == true && endPos.y as i8 - i as i8>= 0 {
-                if board.tile[endPos.x as usize][(endPos.y-i) as usize].peice == ' ' {}
-                else if board.tile[endPos.x as usize][(endPos.y-i) as usize].peice == 'r' && board.tile[endPos.x as usize][(endPos.y-i) as usize].colour == player {
-                     startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y - i) as u8;
-                }else {checkD = false}
-            }else{checkD = false}//Down
-            
-            if checkR == true && endPos.x + i < 8 {
-                if board.tile[(endPos.x + i) as usize][endPos.y as usize].peice == ' ' {}
-                else if board.tile[(endPos.x+i) as usize][endPos.y as usize].peice == 'r' && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player {
-                     startPos.peice = 's'; startPos.x = (endPos.x + i) as u8; startPos.y = endPos.y;
-                }else {checkR = false}
-            }else{checkR = false}//Right
-            
-            if checkL == true && endPos.x as i8 - i as i8 >= 0 {
-                if board.tile[(endPos.x - i) as usize][endPos.y as usize].peice == ' ' {}
-                else if board.tile[(endPos.x-i) as usize][endPos.y as usize].peice == 'r' && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player{
-                     startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = endPos.y;
-                }else {checkL = false}
-            }else{checkL = false}//Left
-        }    
+        startPos = checkQMB(&board, startPos, &endPos, player, 'r', true, true, true, true, false, false, false, false);
     }//rook allowed
     
     else if endPos.peice == 'n' {
@@ -289,8 +322,12 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
       }
     }//knight allowed
    
-    else if endPos.peice == 'b' {}
-    else if endPos.peice == 'q' {}
+    else if endPos.peice == 'b' {
+        startPos = checkQMB(&board, startPos, &endPos, player, 'b', false, false, false, false, true, true, true, true);
+    }
+    else if endPos.peice == 'q' {
+        startPos = checkQMB(&board, startPos, &endPos, player, 'q', true, true, true, true, true, true, true, true);
+    }
     else if endPos.peice == 'k' {}
     else {startPos.peice = 'f'}
     
