@@ -78,13 +78,14 @@ impl Board {
     }
     //prints out the board
     fn print(&self){
-    
+        
+        print!("Black taken: ");
         for i in 0..self.takenBlack.len(){
-            print!("Black taken: {}", self.takenBlack[i]);
+            print!("{}", self.takenBlack[i]);
         }
-        println!("");
+        print!("\nWhite taken: ");
         for i in 0..self.takenWhite.len(){
-            print!("white taken: {}", self.takenWhite[i]);
+            print!("{}", self.takenWhite[i]);
         }
         
         println!(" ");
@@ -130,20 +131,40 @@ impl Board {
     }
     //takes start and end point and kills and moves the peices
     fn Swap(mut self, Final : &Displace, intial : &Displace) -> Board{
-        println!("swap");
+        println!("swap {}", self.tile[Final.x as usize][(Final.y as i8 - 1) as usize].peice);
         if self.tile[Final.x as usize][Final.y as usize].colour == 1{
                 self.takenWhite.push( self.tile[Final.x as usize][Final.y as usize].peice );
         } else if self.tile[Final.x as usize][Final.y as usize].colour == 2{
                 self.takenBlack.push( self.tile[Final.x as usize][Final.y as usize].peice );
         } else if intial.peice == 'S' {//self.tile[Final.x as usize][Final.y as usize].colour == 0 {
-            if self.tile[intial.x as usize][intial.y as usize].colour == 1{
-                self.takenWhite.push( self.tile[Final.x as usize][(Final.y as i8 + 1) as usize].peice );
-                self.tile[Final.x as usize][(Final.y as i8 +1) as usize].peice = ' ';
-                self.tile[Final.x as usize][(Final.y as i8 +1) as usize].colour = 0 ;
-            }else if  self.tile[intial.x as usize][intial.y as usize].colour == 2 {
-                self.takenBlack.push( self.tile[Final.x as usize][(Final.y as i8 + 1) as usize].peice );
+            if self.tile[intial.x as usize][intial.y as usize].colour == 2{
+                self.takenWhite.push( self.tile[Final.x as usize][(Final.y as i8 - 1) as usize].peice );
                 self.tile[Final.x as usize][(Final.y as i8 -1) as usize].peice = ' ';
                 self.tile[Final.x as usize][(Final.y as i8 -1) as usize].colour = 0 ;
+            }else if  self.tile[intial.x as usize][intial.y as usize].colour == 1 {
+                self.takenBlack.push( self.tile[Final.x as usize][(Final.y as i8 + 1) as usize].peice );
+                self.tile[Final.x as usize][(Final.y as i8 +1) as usize].peice = ' ';
+                self.tile[Final.x as usize][(Final.y as i8 +1) as usize].colour = 0 ;
+            }
+        }
+        
+        if Final.y == 7 && Final.peice =='p'{
+            println!("pawn premotted please select replacement");
+            let mut sucsses = true;
+            while(sucsses == true) {
+            let mut select = String::new();
+            io::stdin().read_line(&mut select).unwrap();
+            select = select.trim().to_string();
+            if select.len() == 1{ 
+                match select.as_ref(){
+                    "n" => self.tile[intial.x as usize][intial.y as usize].peice = 'n',
+                    "r" => self.tile[intial.x as usize][intial.y as usize].peice = 'r',
+                    "b" => self.tile[intial.x as usize][intial.y as usize].peice = 'b',
+                    "q" => self.tile[intial.x as usize][intial.y as usize].peice = 'q',
+                    _ => println!("please select ether q r b q"),
+                }
+            }
+            if self.tile[intial.x as usize][intial.y as usize].peice != 'p' { break; }
             }
         }
     
