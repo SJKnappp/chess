@@ -230,6 +230,36 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     }//pawn allowed 
     
     else if endPos.peice == 'r' {
+    let mut checkU = true; let mut checkD = true; let mut checkL = true; let mut checkR = true;
+        for i in 0..8{
+            if checkU == true && endPos.y + i < 8 {
+                if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == ' ' {}
+                else if board.tile[endPos.x as usize][(endPos.y+i )as usize].peice == 'r' && board.tile[endPos.x as usize][(endPos.y+i) as usize].colour == player {
+                     startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y + i) as u8;
+                }else {checkU = false}
+            }else{checkU = false}//Up
+            
+            if checkD == true && endPos.y - i >= 0 {
+                if board.tile[endPos.x as usize][(endPos.y-i) as usize].peice == ' ' {}
+                else if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == 'r' && board.tile[endPos.x as usize][(endPos.y-i) as usize].colour == player {
+                     startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y - i) as u8;
+                }else {checkD = false}
+            }else{checkD = false}//Down
+            
+            if checkR == true && endPos.x + i < 8 {
+                if board.tile[(endPos.x + i) as usize][endPos.y as usize].peice == ' ' {}
+                else if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == 'r' && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player {
+                     startPos.peice = 's'; startPos.x = (endPos.x + i) as u8; startPos.y = endPos.y;
+                }else {checkR = false}
+            }else{checkR = false}//Right
+            
+            if checkL == true && endPos.x - i > 0 {
+                if board.tile[(endPos.x - i) as usize][endPos.y as usize].peice == ' ' {}
+                else if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == 'r' && board.tile[(endPos.x - i) as usize][(endPos.y+i) as usize].colour == player{
+                     startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = endPos.y;
+                }else {checkL = false}
+            }else{checkL = false}//Up
+        }    
     }//rook allowed
     
     else if endPos.peice == 'n' {
