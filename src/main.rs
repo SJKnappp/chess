@@ -290,10 +290,7 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
         } //en possion right
     }//pawn allowed 
     
-    else if endPos.peice == 'r' {
-    let mut checkU = true; let mut checkD = true; let mut checkL = true; let mut checkR = true;
-        startPos = checkQMB(&board, startPos, &endPos, player, 'r', true, true, true, true, false, false, false, false);
-    }//rook allowed
+    else if endPos.peice == 'r' { startPos = checkQMB(&board, startPos, &endPos, player, 'r', true, true, true, true, false, false, false, false); }//rook allowed
     
     else if endPos.peice == 'n' {
       if if endPos.x + 1 < 8 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'n'} else {true == false} {
@@ -322,13 +319,34 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
       }
     }//knight allowed
    
-    else if endPos.peice == 'b' {
-        startPos = checkQMB(&board, startPos, &endPos, player, 'b', false, false, false, false, true, true, true, true);
-    }
-    else if endPos.peice == 'q' {
-        startPos = checkQMB(&board, startPos, &endPos, player, 'q', true, true, true, true, true, true, true, true);
-    }
-    else if endPos.peice == 'k' {}
+    else if endPos.peice == 'b' { startPos = checkQMB(&board, startPos, &endPos, player, 'b', false, false, false, false, true, true, true, true); } //bishop
+    else if endPos.peice == 'q' { startPos = checkQMB(&board, startPos, &endPos, player, 'q', true, true, true, true, true, true, true, true); } //queen
+    else if endPos.peice == 'k' {
+        if board.tile[endPos.x as usize][(endPos.y + 1) as usize].peice == 'k' && board.tile[endPos.x as usize][(endPos.y + 1) as usize].colour == player {
+            startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + 1) as u8;
+        }
+        else if board.tile[(endPos.x + 1) as usize][(endPos.y + 1) as usize].peice == 'k' && board.tile[(endPos.x + 1) as usize][(endPos.y + 1) as usize].colour == player {
+            startPos.peice = 's'; startPos.x = (endPos.x as i8 + 1) as u8; startPos.y = (endPos.y as i8 + 1) as u8;
+        }
+        else if board.tile[(endPos.x + 1) as usize][endPos.y as usize].peice == 'k' && board.tile[(endPos.x + 1) as usize][endPos.y as usize].colour == player {
+            startPos.peice = 's'; startPos.x = (endPos.x as i8 + 1) as u8; startPos.y = endPos.y;
+        }
+        else if board.tile[(endPos.x + 1) as usize][(endPos.y - 1) as usize].peice == 'k' && board.tile[(endPos.x + 1) as usize][(endPos.y - 1) as usize].colour == player {
+            startPos.peice = 's'; startPos.x = (endPos.x as i8 + 1) as u8; startPos.y = (endPos.y as i8 - 1) as u8;
+        }
+        else if board.tile[endPos.x as usize][(endPos.y - 1) as usize].peice == 'k' && board.tile[endPos.x as usize][(endPos.y - 1) as usize].colour == player {
+            startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 - 1) as u8;
+        }
+        else if board.tile[(endPos.x - 1) as usize][(endPos.y - 1) as usize].peice == 'k' && board.tile[(endPos.x - 1) as usize][(endPos.y - 1) as usize].colour == player {
+            startPos.peice = 's'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = (endPos.y as i8 - 1) as u8;
+        }
+        else if board.tile[(endPos.x - 1) as usize][endPos.y as usize].peice == 'k' && board.tile[(endPos.x - 1) as usize][endPos.y as usize].colour == player {
+            startPos.peice = 's'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = endPos.y;
+        }
+        else if board.tile[(endPos.x - 1) as usize][(endPos.y + 1) as usize].peice == 'k' && board.tile[(endPos.x - 1) as usize][(endPos.y + 1) as usize].colour == player {
+            startPos.peice = 's'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = (endPos.y as i8 + 1) as u8;
+        }
+    } // king
     else {startPos.peice = 'f'}
     
     return startPos;
@@ -346,7 +364,7 @@ fn main() {
         if moveAccepted == true{
             if board.player == true{board.player = false;}else{board.player = true;}
             board.print();
-            println!("player: {} please make your move \n", if board.player == true { "white " }else {" black"});
+            print!("player: {} please make your move:  \n", if board.player == true { "white" }else {"black"});
         }else{println!("please reenter your move"); moveAccepted = true;}
         let mut play = String::new();
         io::stdin().read_line(&mut play).unwrap();
@@ -371,6 +389,11 @@ fn main() {
             }else{moveAccepted = false;}
         }else if play == "exit"{ break; }
         else{moveAccepted = false;}
+        
+        if board.tile[turn.x as usize][turn.y as usize].peice == 'k'{
+            println!("cannot take the king");
+            moveAccepted = false;
+        }
         
         if moveAccepted == true {
             end = checkallowed(&board, &turn);
