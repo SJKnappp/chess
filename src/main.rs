@@ -495,7 +495,13 @@ fn nextTake(board : &Board) -> [[Sphere;8];8]{
         for i in 0..8{
             sphere[i][j].whiteSphere += white[i][j];
             sphere[i][j].blackSphere += black[i][j];
-            print!("b:{} w:{} ", sphere[i][j].blackSphere, sphere[i][j].whiteSphere);
+            print!("{} ", sphere[i][j].blackSphere);
+        }
+        
+        print!("   ");
+        
+        for i in 0..8{
+            print!("{} ", sphere[i][j].whiteSphere);
         }
         
         println!("")
@@ -514,7 +520,7 @@ fn CheckDetc(board : &Board, sphere : &[[Sphere;8];8]) -> Check{
                 if board.tile[i][j].colour == 1 && sphere[i][j].whiteSphere > 0 {
                     println!("black check");
                     check.black = true;
-                }else if board.tile[i][j].colour == 2 && sphere[i][j].whiteSphere > 0 {
+                }else if board.tile[i][j].colour == 2 && sphere[i][j].blackSphere > 0 {
                     println!("white check");
                     check.white = true;
                 }
