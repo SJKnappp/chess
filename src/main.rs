@@ -1,7 +1,9 @@
 #![allow(non_snake_case)]
- 
+
 extern crate ansi_term;
 
+use std::fs::File;
+use std::io::prelude::*;
 use ansi_term::Colour::{Red, White};
 use std::{io};
 
@@ -26,6 +28,11 @@ struct Displace{
     y : u8, //stores coords
     ambigX : u8, //used to resolve abisuas moves
     ambigY : u8,
+    moveStr : [char; 5],
+}
+
+impl Displace{
+
 }
 
 #[derive(Copy, Clone)]
@@ -299,7 +306,7 @@ fn checkQMB(board : &Board, mut startPos : Displace, endPos : &Displace, mut pla
 
 fn resolve_Ambig(startPos : &Vec<Displace>, endPos : &Displace) -> Displace{
     print!("amb {} ", startPos.len());
-    let mut intial = Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8};
+    let mut intial = Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8, moveStr : [' '; 5]};
     let mut temp = intial.clone();
     let mut allowed : Vec<Displace> = Vec::new();
     let mut ambigResolved = false; //solved ambiguatiy
@@ -310,10 +317,11 @@ fn resolve_Ambig(startPos : &Vec<Displace>, endPos : &Displace) -> Displace{
     if startPos.len() == 0{return intial}
 
     if startPos.len() == 1{
-        intial = startPos[0];
-        return intial;
+        intial = startPos[0].clone();
+        ambigResolved = true;
     }
 
+    if ambigResolved == false{
     for i in 0..startPos.len() {
         print!("{} ", startPos[i].peice);
         if endPos.ambigX != 8 { //detects if move is allowed
@@ -325,32 +333,31 @@ fn resolve_Ambig(startPos : &Vec<Displace>, endPos : &Displace) -> Displace{
 
         if ambigResolvedX == true && ambigResolvedY == true {count += 1; allowed.push(startPos[i]);}
         ambigResolvedX = false; ambigResolvedY = false; //resets values
+        }
 
-    }
-    print!("count {} ", count);
+
+
     if count == 1{intial = allowed[0];}
     if count > 1{
         println!("please select numbered option");
         for i in 0..allowed.len(){
-            println!("{}: peice {} x {} y {} ", i + 1, allowed[i].peice ,allowed[i].x, allowed[i].y);
+            println!("{} : {}{} ", i+1,(allowed[i].x +97) as char, allowed[i].y + 1);
         }
     }
 
-    println!("");
     let mut play = String::new();
-    io::stdout();
     io::stdin().read_line(&mut play).unwrap(); //input from
     play = play.trim().to_string();
 
     let result = play.as_bytes()[0] - 49;
     intial = allowed[result as usize];
-
+    }
     return intial;
 }
 
 fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
 
-    let mut startPos = Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8};
+    let mut startPos = Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8, moveStr : [' ';5]};
     let mut startVec : Vec<Displace> = Vec::new();
     let player : u8;
     let openent : u8;
@@ -657,6 +664,26 @@ fn CheckDetc(board : &Board, sphere : &[[Sphere;8];8]) -> Check{
     return check;
 }
 
+//save board state to file
+fn save(board : &Board, mut endPos : Displace, mut intial : Displace) -> std::io::Result<()>{
+
+    let mut count = 0;
+    if endPos.peice == 'p' {} else {intial.moveStr[0] = endPos.peice; count += 1;}
+    if intial.ambigX == 8 {} else {intial.moveStr[count] = (intial.ambigX) as char; count += 1;}
+    if intial.ambigY == 8 {} else {intial.moveStr[count] = (intial.ambigY) as char; count += 1;}
+    intial.moveStr[count] = (endPos.x +97) as char;
+    intial.moveStr[count+1] = (endPos.y+49) as char;
+
+    println!(" test {}{}{}{}{} test1", intial.moveStr[0], intial.moveStr[1], intial.moveStr[2], intial.moveStr[3], intial.moveStr[4]);
+
+    let mut file = File::create("Foo.pgn")?;
+
+    for i in 0..board.History.len(){
+        // /file.write_all(board.History[i])?;
+    }
+    Ok(())
+}
+
 //main function
 fn main() {
 
@@ -664,9 +691,10 @@ fn main() {
     let running = true;
     let mut board = Board::new();
     let mut moveAccepted = true;
-    let mut turn = Displace {peice : ' ', x : 8, y : 8, ambigX : 8, ambigY : 8};
-    let mut end = Displace {peice: ' ', x:8, y: 8, ambigX : 8, ambigY : 8};
+    let mut turn = Displace {peice : ' ', x : 8, y : 8, ambigX : 8, ambigY : 8, moveStr : [' '; 5]};
+    let mut end = Displace {peice: ' ', x:8, y: 8, ambigX : 8, ambigY : 8, moveStr : [' '; 5]};
     let mut oldstate = board.clone();
+    let mut history =  String::new();
 
     let mut sphere = nextTake(&board);
 
@@ -723,7 +751,7 @@ fn main() {
         }else if play == "exit"{ break; }
         else{moveAccepted = false;}
 
-        if board.tile[turn.x as usize][turn.y as usize].peice == 'K'{ //checks if king is being taken
+        if board.tile[turn.x.clone() as usize][turn.y.clone() as usize].peice == 'K'{ //checks if king is being taken
             println!("cannot take the king");
             moveAccepted = false;
         }
@@ -735,7 +763,7 @@ fn main() {
 
         if moveAccepted == true { //moves the peices
             board = board.Swap(&turn, &end);
-            board.History.push(turn);
+
             sphere = nextTake(&board);
             check = CheckDetc(&board, &sphere);
 
@@ -747,6 +775,9 @@ fn main() {
                 print!("in check");
                 board = oldstate.clone();
             }else {
+                history = format!("{}{}{}{}{}", end.moveStr[0], end.moveStr[1], end.moveStr[2], end.moveStr[3], end.moveStr[4]);
+                print!("{}{}{}{}{}", end.moveStr[0], end.moveStr[1], end.moveStr[2], end.moveStr[3], end.moveStr[4]);
+                println!("test {} test", history);
                 oldstate = board.clone(); //updates old state
                 board.History.push(turn); //creates a history in PGN notation
             }
