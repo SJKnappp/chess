@@ -297,9 +297,61 @@ fn checkQMB(board : &Board, mut startPos : Displace, endPos : &Displace, mut pla
     return startPos;
 }
 
+fn resolve_Ambig(startPos : &Vec<Displace>, endPos : &Displace) -> Displace{
+    print!("amb {} ", startPos.len());
+    let mut intial = Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8};
+    let mut temp = intial.clone();
+    let mut allowed : Vec<Displace> = Vec::new();
+    let mut ambigResolved = false; //solved ambiguatiy
+    let mut ambigResolvedX = false;
+    let mut ambigResolvedY = false;
+    let mut count = 0;
+
+    if startPos.len() == 0{return intial}
+
+    if startPos.len() == 1{
+        intial = startPos[0];
+        return intial;
+    }
+
+    for i in 0..startPos.len() {
+        print!("{} ", startPos[i].peice);
+        if endPos.ambigX != 8 { //detects if move is allowed
+            if endPos.ambigX == startPos[i].x {ambigResolvedX = true;}
+        }else {ambigResolvedX = true;}
+        if endPos.ambigY != 8 {
+            if endPos.ambigY == startPos[i].x {ambigResolvedY = true;}
+        }else {ambigResolvedY = true;}
+
+        if ambigResolvedX == true && ambigResolvedY == true {count += 1; allowed.push(startPos[i]);}
+        ambigResolvedX = false; ambigResolvedY = false; //resets values
+
+    }
+    print!("count {} ", count);
+    if count == 1{intial = allowed[0];}
+    if count > 1{
+        println!("please select numbered option");
+        for i in 0..allowed.len(){
+            println!("{}: peice {} x {} y {} ", i + 1, allowed[i].peice ,allowed[i].x, allowed[i].y);
+        }
+    }
+
+    println!("");
+    let mut play = String::new();
+    io::stdout();
+    io::stdin().read_line(&mut play).unwrap(); //input from
+    play = play.trim().to_string();
+
+    let result = play.as_bytes()[0] - 49;
+    intial = allowed[result as usize];
+
+    return intial;
+}
+
 fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
 
-    let mut startPos = Displace{peice : 'f', x : 8, y : 8, ambigX : 8, ambigY : 8};
+    let mut startPos = Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8};
+    let mut startVec : Vec<Displace> = Vec::new();
     let player : u8;
     let openent : u8;
     let direc : i8;
@@ -310,41 +362,43 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
 
         if board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].colour == player{
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + direc) as u8;
+            print!("test1");
+            startVec.push(startPos);
         } //move one foward
 
-        else if board.tile[endPos.x as usize][(endPos.y as i8 + 2 * direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' '  &&
+        if board.tile[endPos.x as usize][(endPos.y as i8 + 2 * direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' '  &&
         board.tile[endPos.x as usize][(endPos.y as i8 + direc) as usize].peice == ' ' && board.tile[endPos.x as usize][(endPos.y as i8 + 2 *  direc)as usize].colour == player
         && ((endPos.y == 3 && player == 2) || (endPos.y == 4 && player == 1)){
-
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + 2 *  direc) as u8;
-
+            print!("test2");
+            startVec.push(startPos);
         } //move two foward
 
-        else if ( if endPos.x < 7 { board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].colour == openent && board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].colour == player} else {false == true}){
-
+        if ( if endPos.x < 7 { board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].colour == openent && board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].colour == player} else {false == true}){
             startPos.peice = 's'; startPos.x = endPos.x + 1; startPos.y = (endPos.y as i8 + direc) as u8;
-
+            println!("test3");
+            startVec.push(startPos);
         } //takes left
 
-        else if ( if endPos.x > 0 { board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].colour == openent && board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].colour == player} else {false == true}){
-
+        if ( if endPos.x > 0 { board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].colour == openent && board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].colour == player} else {false == true}){
+            println!("test4");
             startPos.peice = 's'; startPos.x = endPos.x - 1; startPos.y = (endPos.y as i8 + direc) as u8;
-
+            startVec.push(startPos);
         } //take right
 
-        else if ( if endPos.x < 7 { board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.History[board.History.len() - 1].peice == 'p'
+        if ( if endPos.x < 7 { board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.History[board.History.len() - 1].peice == 'p'
         && board.History[board.History.len() - 1].x == endPos.x && board.History[board.History.len() - 1].y == (endPos.y as i8 + direc) as u8  && board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].colour == player}
         else {false == true}){
 
             startPos.peice = 'S'; startPos.x = endPos.x + 1; startPos.y = (endPos.y as i8 + direc) as u8;
-
+            startVec.push(startPos);
         } //en possion left
 
-        else if ( if endPos.x > 0 { board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' &&
+        if ( if endPos.x > 0 { board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' &&
         (board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.History[board.History.len() - 1].peice == 'p' && board.History[board.History.len() - 1].x == endPos.x && board.History[board.History.len() - 1].y ==( endPos.y as i8 + direc ) as u8 ) && board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].colour == player} else {false == true}){
 
             startPos.peice = 'S'; startPos.x = endPos.x - 1; startPos.y = (endPos.y as i8 + direc) as u8;
-
+            startVec.push(startPos);
         } //en possion right
     }//pawn allowed
 
@@ -353,27 +407,35 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     else if endPos.peice == 'N' {
       if if endPos.x + 1 < 8 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'N' && board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 + 2)as usize].colour == player} else {true == false} {
         startPos.peice = 'N'; startPos.x = (endPos.x as i8 + 1) as u8; startPos.y = (endPos.y as i8 + 2) as u8;
+        startVec.push(startPos);
       }
-      else if if endPos.x as i8 - 1 >= 0 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'N' && board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 + 2)as usize].colour == player} else {true == false} {
+      if if endPos.x as i8 - 1 >= 0 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'N' && board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 + 2)as usize].colour == player} else {true == false} {
         startPos.peice = 'N'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = (endPos.y as i8 + 2) as u8;
+        startVec.push(startPos);
       }
-      else if if endPos.x + 1 < 8 && endPos.y as i8 - 2 >= 0 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'N' && board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 - 2)as usize].colour == player} else {true == false} {
+      if if endPos.x + 1 < 8 && endPos.y as i8 - 2 >= 0 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'N' && board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 - 2)as usize].colour == player} else {true == false} {
         startPos.peice = 'N'; startPos.x = (endPos.x as i8 + 1) as u8; startPos.y = (endPos.y as i8 - 2) as u8;
+        startVec.push(startPos);
       }
-      else if if endPos.x as i8 - 1 >= 0 && endPos.y as i8 - 2 >= 0 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'N' && board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 - 2)as usize].colour == player} else {true == false} {
+      if if endPos.x as i8 - 1 >= 0 && endPos.y as i8 - 2 >= 0 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'N' && board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 - 2)as usize].colour == player} else {true == false} {
         startPos.peice = 'N'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = (endPos.y as i8 - 2) as u8 ;
+        startVec.push(startPos);
       }
-      else if if endPos.x + 2 < 8 && endPos.y + 1 < 8 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'N' && board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 + 1)as usize].colour == player} else {true == false} {
+      if if endPos.x + 2 < 8 && endPos.y + 1 < 8 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'N' && board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 + 1)as usize].colour == player} else {true == false} {
         startPos.peice = 'N'; startPos.x = (endPos.x as i8 + 2) as u8; startPos.y = (endPos.y as i8 + 1) as u8;
+        startVec.push(startPos);
       }
-      else if if endPos.x + 2 < 8 && endPos.y as i8 - 1 >= 0 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'N' && board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 - 1)as usize].colour == player} else {true == false} {
+      if if endPos.x + 2 < 8 && endPos.y as i8 - 1 >= 0 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'N' && board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 - 1)as usize].colour == player} else {true == false} {
         startPos.peice = 'N'; startPos.x = (endPos.x as i8 + 2) as u8; startPos.y = (endPos.y as i8 - 1) as u8;
+        startVec.push(startPos);
       }
-      else if if endPos.x as i8 - 2 >= 0 && endPos.y + 1 < 8 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'N' && board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 + 1)as usize].colour == player} else {true == false} {
+      if if endPos.x as i8 - 2 >= 0 && endPos.y + 1 < 8 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'N' && board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 + 1)as usize].colour == player} else {true == false} {
         startPos.peice = 'N'; startPos.x = (endPos.x as i8 - 2) as u8; startPos.y = (endPos.y as i8 + 1) as u8;
+        startVec.push(startPos);
       }
-      else if if endPos.x as i8 - 2 >= 0 && endPos.y as i8 - 1 >= 0 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'N' && board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 - 1)as usize].colour == player} else { true == false} {
+      if if endPos.x as i8 - 2 >= 0 && endPos.y as i8 - 1 >= 0 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'N' && board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 - 1)as usize].colour == player} else { true == false} {
         startPos.peice = 'N'; startPos.x = (endPos.x as i8 - 2) as u8; startPos.y = (endPos.y as i8 - 1) as u8;
+        startVec.push(startPos);
       }
     }//knight allowed
 
@@ -404,8 +466,10 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
         else if board.tile[(endPos.x - 1) as usize][(endPos.y + 1) as usize].peice == 'K' && board.tile[(endPos.x - 1) as usize][(endPos.y + 1) as usize].colour == player {
             startPos.peice = 's'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = (endPos.y as i8 + 1) as u8;
         }
-    } // king
+    } // king does not detect ambuguate as only one king
     else {startPos.peice = 'f'}
+
+    startPos = resolve_Ambig(&startVec, &endPos);
 
     return startPos;
 }
@@ -600,8 +664,8 @@ fn main() {
     let running = true;
     let mut board = Board::new();
     let mut moveAccepted = true;
-    let mut turn = Displace {peice : ' ', x : 9, y : 9, ambigX : 9, ambigY : 9};
-    let mut end = Displace {peice: ' ', x:1, y: 1, ambigX : 9, ambigY : 9};
+    let mut turn = Displace {peice : ' ', x : 8, y : 8, ambigX : 8, ambigY : 8};
+    let mut end = Displace {peice: ' ', x:8, y: 8, ambigX : 8, ambigY : 8};
     let mut oldstate = board.clone();
 
     let mut sphere = nextTake(&board);
