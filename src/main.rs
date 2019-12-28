@@ -4,6 +4,12 @@ extern crate ansi_term;
 
 use ansi_term::Colour::{Red, White};
 use std::{io};
+
+#[derive(Copy, Clone)]
+struct Check{
+    white : bool,
+    black : bool,
+}
  
 #[derive(Copy, Clone)]
 struct Sphere{
@@ -455,8 +461,12 @@ fn nextTake(board : &Board) -> [[Sphere;8];8]{
             }else if board.tile[i][j].peice == 'n'{
                 
             }else if board.tile[i][j].peice == 'b'{
+                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, false, false, false, false, true, true, true, true); } 
+                else {white = nextMovers(board, white, i, j, &2, false, false, false, false, true, true, true, true); }
                 
             }else if board.tile[i][j].peice == 'q'{
+                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, true, true, true, true, true, true, true, true); } 
+                else {white = nextMovers(board, white, i, j, &2, true, true, true, true, true, true, true, true); }
                 
             }else if board.tile[i][j].peice == 'k'{
                 if board.tile[i][j].colour == 1 {
@@ -481,7 +491,40 @@ fn nextTake(board : &Board) -> [[Sphere;8];8]{
             }
         }
     }
+    
+    for j in 0..8{
+        for i in 0..8{
+            sphere[i][j].whiteSphere += white[i][j];
+            sphere[i][j].blackSphere += black[i][j];
+            
+            print!("b:{} w:{} ", sphere[i][j].blackSphere, sphere[i][j].whiteSphere);
+        }
+        
+        println!("")
+    }
+    
     return sphere;
+}
+
+fn CheckDetc(board : &Board, sphere : &[[Sphere;8];8]) -> Check{
+    let mut check = Check{white: false, black : false};
+    let mut kingCount = 0;
+    for j in 0..8{
+        for i in 0..8{
+            if board.tile[i][j].peice == 'k'{
+                kingCount += 1;
+                if board.tile[i][j].colour == 1 && sphere[i][j].whiteSphere > 0 {
+                    println!("black check");
+                    check.black = true;
+                }else if board.tile[i][j].colour == 2 && sphere[i][j].whiteSphere > 0 {
+                    println!("white check");
+                    check.white = true;
+                }
+            }
+        }
+        if kingCount == 2{return check;}
+    }
+    return check;
 }
     
 //main function
@@ -494,11 +537,19 @@ fn main() {
     let mut turn = Displace {peice : ' ', x : 9, y : 9};
     let mut end = Displace {peice: ' ', x:1, y: 1};
     
+    let mut sphere = nextTake(&board);
+    
+    let mut check = Check{white: false, black : false};
+    
     while running { //main loop
         if moveAccepted == true{
-            if board.player == true{board.player = false;}else{board.player = true;} //player
+            if board.player == true{board.player = false; }else{board.player = true;} //player
             board.print();
+            
+            check = CheckDetc(&board, &sphere);
+            
             print!("player: {} please make your move:  \n", if board.player == true { "white" }else {"black"}); //player turn
+            
         }else{println!("please reenter your move"); moveAccepted = true;} //reinput turn if not allowed
         let mut play = String::new();
         io::stdin().read_line(&mut play).unwrap(); //input move
@@ -537,6 +588,7 @@ fn main() {
         if moveAccepted == true { //moves the peices 
             board = board.Swap(&turn, &end);
             board.History.push(turn);            
+            sphere = nextTake(&board);
         }
     }
     println!("Hello, world!");
