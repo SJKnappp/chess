@@ -107,7 +107,7 @@ impl Board {
         print!("\n    "); //sets intial displacment of the coords print out
         
         let mut a = 'a' as u8; //stores interger value of a to loop through
-        for i in 0..8{
+        for _i in 0..8{
             print!("{}   ", a as char); // prints the letter
             a+=1;
         }
@@ -129,7 +129,7 @@ impl Board {
         print!("    ");
         a = 'a' as u8;
         
-        for i in 0..8{
+        for _i in 0..8{
             print!("{}   ", a as char); // prints bottom row coordinates
             a+=1;
         }
@@ -165,7 +165,7 @@ impl Board {
         if (Final.y == 7 || Final.y == 0 )&& Final.peice =='p'{ //premottes pawn
             println!("pawn premotted please select replacement");
             let mut sucsses = true;
-            while(sucsses == true) { //waits till pawn prommotion sucseful before moving on
+            while sucsses == true { //waits till pawn prommotion sucseful before moving on
             let mut select = String::new();
             io::stdin().read_line(&mut select).unwrap(); //takes an input
             select = select.trim().to_string();
@@ -263,7 +263,6 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
   
     if endPos.peice == 'p' {
         if board.player == false{direc = 1;}else{direc = -1;} //direc looking backtowards start pos
-        print!("{}", direc);
         
         if board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].colour == player{
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + direc) as u8;
@@ -431,6 +430,19 @@ fn nextMovers(board : &Board, mut result : [[i8;8];8] ,xCord : usize, yCord : us
     return result;
 }
 
+fn nextNight(board : &Board, mut result : [[i8;8];8], x : &usize, y : &usize) -> [[i8;8];8]{
+    if *x + 2 < 8 && *y + 1 < 8 {result[x+2][y+1] +=1;}
+    if *x + 2 < 8 && *y as i8 - 1 >= 0 {result[(x+2) as usize][(y-1) as usize] += 1;}
+    if *x as i8 - 2 >= 0 && *y + 1 < 8 {result[(x-2) as usize][(y+1) as usize] += 1;}
+    if *x as i8- 2 >= 0 && *y as i8 - 1 >= 0 {result[(x-2) as usize][(y-1) as usize] += 1;}
+    if *x + 1 < 8 && *y + 2 < 8 {result[(x+1) as usize][(y+2) as usize]+= 1;}
+    if *x as i8 - 1 >= 0 && *y + 2 < 8 {result[(x-1) as usize][(y+2) as usize]+=1;}
+    if *x + 1 < 8 && *y as i8 - 2 >= 0 {result[(x+1) as usize][(y-2) as usize]+=1;}
+    if *x as i8 - 1 >= 0 && *y as i8 - 2 >= 0 {result[(x-1) as usize][(y-2) as usize]+=1;}
+    
+    return result;
+}
+
 //array of all posible captures points in next turn note does not include all moves
 fn nextTake(board : &Board) -> [[Sphere;8];8]{
 
@@ -453,21 +465,27 @@ fn nextTake(board : &Board) -> [[Sphere;8];8]{
                     }
                 }
                 
-            }else if board.tile[i][j].peice == 'r'{
+            }
+            else if board.tile[i][j].peice == 'r'{
                 if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, true, true, true, true, false, false, false, false); } 
                 else {white = nextMovers(board, white, i, j, &2, true, true, true, true, false, false, false, false); }
                 
-            }else if board.tile[i][j].peice == 'n'{
-                
-            }else if board.tile[i][j].peice == 'b'{
+            }
+            else if board.tile[i][j].peice == 'n'{
+                if board.tile[i][j].colour == 1{ black = nextNight(board, black, &i, &j); }
+                else { white = nextNight(board, white, &i, &j); }
+            }
+            else if board.tile[i][j].peice == 'b'{
                 if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, false, false, false, false, true, true, true, true); } 
                 else {white = nextMovers(board, white, i, j, &2, false, false, false, false, true, true, true, true); }
-                
-            }else if board.tile[i][j].peice == 'q'{
+            }
+            
+            else if board.tile[i][j].peice == 'q'{
                 if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, true, true, true, true, true, true, true, true); } 
                 else {white = nextMovers(board, white, i, j, &2, true, true, true, true, true, true, true, true); }
-                
-            }else if board.tile[i][j].peice == 'k'{
+            }
+            
+            else if board.tile[i][j].peice == 'k'{
                 if board.tile[i][j].colour == 1 {
                     if i > 0 {sphere[i-1][j].blackSphere += 1;}
                     if j < 7 {sphere[i+1][j].blackSphere += 1;}
