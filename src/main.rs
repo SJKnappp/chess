@@ -1,5 +1,5 @@
 #![allow(non_snake_case)]
-
+ 
 extern crate ansi_term;
 
 use ansi_term::Colour::{Red, White};
