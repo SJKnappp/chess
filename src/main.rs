@@ -369,8 +369,7 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
 
 fn nextMovers(board : &Board, mut result : [[i8;8];8] ,xCord : usize, yCord : usize, colour : &u8 , mut Up : bool, mut Do :bool, mut Le : bool, mut Ri : bool, mut NE : bool, mut SE : bool, mut SW : bool, mut NW : bool) -> [[i8; 8]; 8]{
     
-    for j in 0..8{
-        for i in 0..8 {
+    for i in 1..8{
             if Up == true && xCord +i < 8 {
                 if board.tile[(xCord + i) as usize][yCord].colour == 0 {}
                 else {Up = false}
@@ -378,57 +377,57 @@ fn nextMovers(board : &Board, mut result : [[i8;8];8] ,xCord : usize, yCord : us
             }
             else {Up = false }
             
-            if Do == true && xCord -i >= 0 {
+            if Do == true && xCord as i8 -i as i8 >= 0 {
                 if board.tile[(xCord - i) as usize][yCord].colour == 0 {}
                 else {Do = false}
                 result[(xCord - i)as usize][yCord] += 1;
             }
             else {Do = false }
             
-            if Le == true && yCord - j >= 0 {
-                if board.tile[xCord][yCord - j as usize].colour == 0 {}
+            if Le == true && yCord as i8 - i as i8 >= 0 {
+                if board.tile[xCord][yCord - i as usize].colour == 0 {}
                 else {Le = false}
-                result[xCord][(yCord - j)as usize] += 1;
+                result[xCord][(yCord - i)as usize] += 1;
             }
             else {Le = false }
             
-            if Up == true && yCord + j < 8 {
-                if board.tile[xCord][(yCord +j ) as usize].colour == 0 {}
+            if Ri == true && yCord + i < 8 {
+                if board.tile[xCord][(yCord +i ) as usize].colour == 0 {}
                 else {Ri = false}
-                result[xCord][(yCord+j)as usize] += 1;
+                result[xCord][(yCord+i)as usize] += 1;
             }
             else {Ri = false }
             
-            if NE == true && xCord +i < 8 && yCord +j < 8 {
-                if board.tile[(xCord + i) as usize][(yCord +j) as usize].colour == 0 {}
+            if NE == true && xCord +i < 8 && yCord + i < 8 {
+                if board.tile[(xCord + i) as usize][(yCord + i) as usize].colour == 0 {}
                 else {NE = false}
-                result[(xCord+i)as usize][(yCord+j)as usize] += 1;
+                result[(xCord+i)as usize][(yCord+i)as usize] += 1;
             }
             else {NE = false }
             
-            if SE == true && xCord +i < 8 && yCord - j >= 0 {
-                if board.tile[(xCord + i) as usize][(yCord - j) as usize].colour == 0 {}
+            if SE == true && xCord +i < 8 && yCord as i8 - i as i8 >= 0 {
+                if board.tile[(xCord + i) as usize][(yCord - i) as usize].colour == 0 {}
                 else {SE = false}
-                result[(xCord + i)as usize][(yCord - j)as usize] += 1;
+                result[(xCord + i)as usize][(yCord - i)as usize] += 1;
             }
             else {SE = false }
             
-            if SW == true && xCord - i >= 0 && yCord - j >= 0{
-                if board.tile[(xCord - i) as usize][(yCord - j) as usize].colour == 0 {}
+            if SW == true && xCord as i8 - i as i8 >= 0 && yCord as i8 - i as i8 >= 0{
+                if board.tile[(xCord - i) as usize][(yCord - i) as usize].colour == 0 {}
                 else {SW = false}
-                result[(xCord+i)as usize][(yCord+j)as usize] += 1;
+                result[(xCord-i)as usize][(yCord-i)as usize] += 1;
             }
             else {SW = false }
             
-            if NW == true && xCord - i >= 0 && yCord +j < 8 {
-                if board.tile[(xCord - i) as usize][(yCord +j) as usize].colour == 0 {}
+            if NW == true && xCord as i8 - i as i8 >= 0 && yCord +i < 8 {
+                if board.tile[(xCord - i) as usize][(yCord +i) as usize].colour == 0 {}
                 else {NW = false}
-                result[(xCord - i)as usize][(yCord + j)as usize] += 1;
+                result[(xCord - i)as usize][(yCord + i)as usize] += 1;
             }
             else {NW = false }
-        }
+            
+        
     }
-    
     return result;
 }
 
@@ -496,7 +495,6 @@ fn nextTake(board : &Board) -> [[Sphere;8];8]{
         for i in 0..8{
             sphere[i][j].whiteSphere += white[i][j];
             sphere[i][j].blackSphere += black[i][j];
-            
             print!("b:{} w:{} ", sphere[i][j].blackSphere, sphere[i][j].whiteSphere);
         }
         
