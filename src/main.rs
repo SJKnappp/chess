@@ -5,6 +5,8 @@ extern crate ansi_term;
 use ansi_term::Colour::{Red, White};
 use std::{io};
 
+mod minmaxAi;
+
 #[derive(Copy, Clone)]
 struct Check{
     white : bool,
@@ -31,6 +33,12 @@ struct Piece{
     moved : bool, //detects peices first move
 }
 
+#[derive(Copy, Clone)]
+struct Player{
+    WhiteAi : bool,
+    BlackAi : bool,
+}
+
 #[derive(Clone)]
 struct Board{
     tile :  [[Piece; 8]; 8], //stores board state
@@ -38,6 +46,7 @@ struct Board{
     takenWhite : Vec<char>, //holds pieces taken by black
     takenBlack : Vec<char>, //hold pieces taken by white
     History : Vec<Displace>, //move histroy
+    playerAi : Player,
 }
 
 impl Board {
@@ -88,9 +97,41 @@ impl Board {
                 temp[i][7-j].colour = 1;
             }
         }
+        let mut accepted = 0;
+        let mut players = Player{WhiteAi : false, BlackAi : false};
 
+        while accepted < 2{
+            accepted = 0;
+            println!("Ai white enter 'y' human enter 'n'");
+            let mut white = String::new();
+            io::stdin().read_line(&mut white).unwrap(); //input move
+            white = white.trim().to_string();
+            if white == "y"{
+                players.WhiteAi = true;
+                accepted += 1;
+            }else if white == "n"{
+                players.WhiteAi = false;
+                accepted += 1;
+            }
+
+            println!("Ai black enter 'y' human enter 'n'");
+            let mut black = String::new();
+            io::stdin().read_line(&mut black).unwrap(); //input move
+            black = black.trim().to_string();
+            if black == "y"{
+                players.BlackAi = true;
+                accepted += 1;
+            }else if white == "n"{
+                players.BlackAi = false;
+                accepted += 1;
+            }
+
+            if accepted < 2 {
+                print!("input failed please retry");
+            }
+        }
         //creats the board
-        let board = Board { tile: temp, player : false, takenWhite : Vec::new(), takenBlack : Vec::new(), History : Vec::new(), };
+        let board = Board { tile: temp, player : false, takenWhite : Vec::new(), takenBlack : Vec::new(), History : Vec::new(), playerAi : players};
         return board;
     }
     //prints out the board
