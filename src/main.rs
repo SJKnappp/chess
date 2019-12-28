@@ -361,61 +361,61 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     return startPos;
 }
 
-fn nextMovers(board : &Board, result : [[i8;8];8] ,xCord : &usize, yCord : &usize, colour : &u8 ,Up :bool, Do :bool, Le : bool, Ri : bool, NE : bool, SE : bool, SW : bool, NW : bool) -> [[i8; 8]; 8]{
+fn nextMovers(board : &Board, mut result : [[i8;8];8] ,xCord : usize, yCord : usize, colour : &u8 , mut Up : bool, mut Do :bool, mut Le : bool, mut Ri : bool, mut NE : bool, mut SE : bool, mut SW : bool, mut NW : bool) -> [[i8; 8]; 8]{
     
     for j in 0..8{
         for i in 0..8 {
             if Up == true && xCord +i < 8 {
-                if board[(xCord + i) as usize][yCord].colour == 0 {}
+                if board.tile[(xCord + i) as usize][yCord].colour == 0 {}
                 else {Up = false}
                 result[(xCord+i)as usize][yCord] += 1;
             }
             else {Up = false }
             
             if Do == true && xCord -i >= 0 {
-                if board[(xCord - i) as usize][yCord].colour == 0 {}
+                if board.tile[(xCord - i) as usize][yCord].colour == 0 {}
                 else {Do = false}
                 result[(xCord - i)as usize][yCord] += 1;
             }
             else {Do = false }
             
             if Le == true && yCord - j >= 0 {
-                if board[xCord][yCord - j as usize].colour == 0 {}
+                if board.tile[xCord][yCord - j as usize].colour == 0 {}
                 else {Le = false}
                 result[xCord][(yCord - j)as usize] += 1;
             }
             else {Le = false }
             
             if Up == true && yCord + j < 8 {
-                if board[xCord][(yCord +j ) as usize].colour == 0 {}
+                if board.tile[xCord][(yCord +j ) as usize].colour == 0 {}
                 else {Ri = false}
                 result[xCord][(yCord+j)as usize] += 1;
             }
             else {Ri = false }
             
             if NE == true && xCord +i < 8 && yCord +j < 8 {
-                if board[(xCord + i) as usize][(yCord +j) as usize].colour == 0 {}
+                if board.tile[(xCord + i) as usize][(yCord +j) as usize].colour == 0 {}
                 else {NE = false}
                 result[(xCord+i)as usize][(yCord+j)as usize] += 1;
             }
             else {NE = false }
             
             if SE == true && xCord +i < 8 && yCord - j >= 0 {
-                if board[(xCord + i) as usize][(yCord - j) as usize].colour == 0 {}
+                if board.tile[(xCord + i) as usize][(yCord - j) as usize].colour == 0 {}
                 else {SE = false}
                 result[(xCord + i)as usize][(yCord - j)as usize] += 1;
             }
             else {SE = false }
             
             if SW == true && xCord - i >= 0 && yCord - j >= 0{
-                if board[(xCord - i) as usize][(yCord - j) as usize].colour == 0 {}
+                if board.tile[(xCord - i) as usize][(yCord - j) as usize].colour == 0 {}
                 else {SW = false}
                 result[(xCord+i)as usize][(yCord+j)as usize] += 1;
             }
             else {SW = false }
             
             if NW == true && xCord - i >= 0 && yCord +j < 8 {
-                if board[(xCord - i) as usize][(yCord +j) as usize].colour == 0 {}
+                if board.tile[(xCord - i) as usize][(yCord +j) as usize].colour == 0 {}
                 else {NW = false}
                 result[(xCord - i)as usize][(yCord + j)as usize] += 1;
             }
@@ -449,8 +449,8 @@ fn nextTake(board : &Board) -> [[Sphere;8];8]{
                 }
                 
             }else if board.tile[i][j].peice == 'r'{
-                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, &i, &j, &1, true, true, true, true, false, false, false, false); } 
-                else {white = nextMovers(board, white, &i, &j, &2, true, true, true, true, false, false, false, false); }
+                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, true, true, true, true, false, false, false, false); } 
+                else {white = nextMovers(board, white, i, j, &2, true, true, true, true, false, false, false, false); }
                 
             }else if board.tile[i][j].peice == 'n'{
                 
