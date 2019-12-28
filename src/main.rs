@@ -1,8 +1,15 @@
+#![allow(non_snake_case)]
 
 extern crate ansi_term;
 
 use ansi_term::Colour::{Red, White};
 use std::{io};
+ 
+#[derive(Copy, Clone)]
+struct Sphere{
+    whiteSphere : i8, //white can move here next turn
+    blackSphere : i8, //black can move here next turn
+}
  
 #[derive(Copy, Clone)]
 struct Displace{
@@ -354,6 +361,129 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     return startPos;
 }
 
+fn nextMovers(board : &Board, result : [[i8;8];8] ,xCord : &usize, yCord : &usize, colour : &u8 ,Up :bool, Do :bool, Le : bool, Ri : bool, NE : bool, SE : bool, SW : bool, NW : bool) -> [[i8; 8]; 8]{
+    
+    for j in 0..8{
+        for i in 0..8 {
+            if Up == true && xCord +i < 8 {
+                if board[(xCord + i) as usize][yCord].colour == 0 {}
+                else {Up = false}
+                result[(xCord+i)as usize][yCord] += 1;
+            }
+            else {Up = false }
+            
+            if Do == true && xCord -i >= 0 {
+                if board[(xCord - i) as usize][yCord].colour == 0 {}
+                else {Do = false}
+                result[(xCord - i)as usize][yCord] += 1;
+            }
+            else {Do = false }
+            
+            if Le == true && yCord - j >= 0 {
+                if board[xCord][yCord - j as usize].colour == 0 {}
+                else {Le = false}
+                result[xCord][(yCord - j)as usize] += 1;
+            }
+            else {Le = false }
+            
+            if Up == true && yCord + j < 8 {
+                if board[xCord][(yCord +j ) as usize].colour == 0 {}
+                else {Ri = false}
+                result[xCord][(yCord+j)as usize] += 1;
+            }
+            else {Ri = false }
+            
+            if NE == true && xCord +i < 8 && yCord +j < 8 {
+                if board[(xCord + i) as usize][(yCord +j) as usize].colour == 0 {}
+                else {NE = false}
+                result[(xCord+i)as usize][(yCord+j)as usize] += 1;
+            }
+            else {NE = false }
+            
+            if SE == true && xCord +i < 8 && yCord - j >= 0 {
+                if board[(xCord + i) as usize][(yCord - j) as usize].colour == 0 {}
+                else {SE = false}
+                result[(xCord + i)as usize][(yCord - j)as usize] += 1;
+            }
+            else {SE = false }
+            
+            if SW == true && xCord - i >= 0 && yCord - j >= 0{
+                if board[(xCord - i) as usize][(yCord - j) as usize].colour == 0 {}
+                else {SW = false}
+                result[(xCord+i)as usize][(yCord+j)as usize] += 1;
+            }
+            else {SW = false }
+            
+            if NW == true && xCord - i >= 0 && yCord +j < 8 {
+                if board[(xCord - i) as usize][(yCord +j) as usize].colour == 0 {}
+                else {NW = false}
+                result[(xCord - i)as usize][(yCord + j)as usize] += 1;
+            }
+            else {NW = false }
+        }
+    }
+    
+    return result;
+}
+
+//array of all posible captures points in next turn note does not include all moves
+fn nextTake(board : &Board) -> [[Sphere;8];8]{
+
+    let mut sphere = [[Sphere {whiteSphere : 0, blackSphere : 0};8];8];
+    let mut black = [[0 as i8; 8]; 8];
+    let mut white = [[0 as i8; 8]; 8];
+    
+    for j in 0..8{
+        for i in 0..8{
+            if board.tile[i][j].peice == 'p'{
+                if board.tile[i][j].colour == 1 {
+                    if j > 0{
+                        if i < 7{ sphere[i+1][j-1].blackSphere += 1; } // ways that pawn can take
+                        if i > 0{ sphere[i-1][j-1].blackSphere += 1; }
+                    }
+                }else if board.tile[i][j].colour == 2 {
+                    if j < 7{
+                        if i < 7{ sphere[i+1][j+1].whiteSphere += 1; } // ways that pawn can take
+                        if i > 0{ sphere[i-1][j+1].whiteSphere += 1; }
+                    }
+                }
+                
+            }else if board.tile[i][j].peice == 'r'{
+                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, &i, &j, &1, true, true, true, true, false, false, false, false); } 
+                else {white = nextMovers(board, white, &i, &j, &2, true, true, true, true, false, false, false, false); }
+                
+            }else if board.tile[i][j].peice == 'n'{
+                
+            }else if board.tile[i][j].peice == 'b'{
+                
+            }else if board.tile[i][j].peice == 'q'{
+                
+            }else if board.tile[i][j].peice == 'k'{
+                if board.tile[i][j].colour == 1 {
+                    if i > 0 {sphere[i-1][j].blackSphere += 1;}
+                    if j < 7 {sphere[i+1][j].blackSphere += 1;}
+                    if i > 0 && j > 0 {sphere[i-1][j-1].blackSphere += 1;}
+                    if i > 0 && j < 7 {sphere[i-1][j+1].blackSphere += 1;}
+                    if i < 7 && j > 0 {sphere[i+1][j-1].blackSphere += 1;}
+                    if i < 7 && j < 7 {sphere[i+1][j+1].blackSphere += 1;}
+                    if j > 0 {sphere[i][j-1].blackSphere += 1;}
+                    if j < 7 {sphere[i][j+1].blackSphere += 1;}
+                }else if board.tile[i][j].colour == 1 {
+                    if i > 0 {sphere[i-1][j].whiteSphere += 1;}
+                    if j < 7 {sphere[i+1][j].whiteSphere += 1;}
+                    if i > 0 && j > 0 {sphere[i-1][j-1].whiteSphere += 1;}
+                    if i > 0 && j < 7 {sphere[i-1][j+1].whiteSphere += 1;}
+                    if i < 7 && j > 0 {sphere[i+1][j-1].whiteSphere += 1;}
+                    if i < 7 && j < 7 {sphere[i+1][j+1].whiteSphere += 1;}
+                    if j > 0 {sphere[i][j-1].whiteSphere += 1;}
+                    if j < 7 {sphere[i][j+1].whiteSphere += 1;}
+                }
+            }
+        }
+    }
+    return sphere;
+}
+    
 //main function
 fn main() {
     
