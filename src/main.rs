@@ -31,6 +31,7 @@ struct Piece{
     moved : bool, //detects peices first move
 }
 
+#[derive(Clone)]
 struct Board{
     tile :  [[Piece; 8]; 8], //stores board state
     player : bool, //false black true whtie
@@ -558,6 +559,7 @@ fn main() {
     let mut moveAccepted = true;
     let mut turn = Displace {peice : ' ', x : 9, y : 9};
     let mut end = Displace {peice: ' ', x:1, y: 1};
+    let mut oldstate = board.clone();
     
     let mut sphere = nextTake(&board);
     
@@ -611,6 +613,18 @@ fn main() {
             board = board.Swap(&turn, &end);
             board.History.push(turn);            
             sphere = nextTake(&board);
+            check = CheckDetc(&board, &sphere);
+            
+            if board.player == true && check.white == true{
+                print!("in check");
+                board = oldstate.clone();
+            }else if board.player == true && check.black == true{
+                print!("in check");
+                board = oldstate.clone();
+            }else {
+                oldstate = board.clone();
+                board.History.push(turn); 
+            }
         }
     }
     println!("Hello, world!");
