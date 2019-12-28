@@ -31,10 +31,6 @@ struct Displace{
     moveStr : [char; 5],
 }
 
-impl Displace{
-
-}
-
 #[derive(Copy, Clone)]
 struct Piece{
     peice : char, //stores the peice r rock n knight b bishop q queen k king p pawn
