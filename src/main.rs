@@ -308,28 +308,28 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     else if endPos.peice == 'r' { startPos = checkQMB(&board, startPos, &endPos, player, 'r', true, true, true, true, false, false, false, false); }//rook allowed
     
     else if endPos.peice == 'n' {
-      if if endPos.x + 1 < 8 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'n'} else {true == false} {
+      if if endPos.x + 1 < 8 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'n' && board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 + 2)as usize].colour == player} else {true == false} {
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 + 1) as u8; startPos.y = (endPos.y as i8 + 2) as u8;
       }
-      else if if endPos.x as i8 - 1 >= 0 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'n'} else {true == false} {
+      else if if endPos.x as i8 - 1 >= 0 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'n' && board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 + 2)as usize].colour == player} else {true == false} {
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = (endPos.y as i8 + 2) as u8;
       }
-      else if if endPos.x + 1 < 8 && endPos.y as i8 - 2 >= 0 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'n'} else {true == false} {
+      else if if endPos.x + 1 < 8 && endPos.y as i8 - 2 >= 0 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'n' && board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 - 2)as usize].colour == player} else {true == false} {
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 + 1) as u8; startPos.y = (endPos.y as i8 - 2) as u8;
       }
-      else if if endPos.x as i8 - 1 >= 0 && endPos.y as i8 - 2 >= 0 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'n'} else {true == false} {
+      else if if endPos.x as i8 - 1 >= 0 && endPos.y as i8 - 2 >= 0 { board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 - 2)as usize].peice == 'n' && board.tile[(endPos.x as i8 - 1) as usize][(endPos.y as i8 - 2)as usize].colour == player} else {true == false} {
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 - 1) as u8; startPos.y = (endPos.y as i8 - 2) as u8 ;
       }
-      else if if endPos.x + 2 < 8 && endPos.y + 1 < 8 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'n'} else {true == false} {
+      else if if endPos.x + 2 < 8 && endPos.y + 1 < 8 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'n' && board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 + 1)as usize].colour == player} else {true == false} {
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 + 2) as u8; startPos.y = (endPos.y as i8 + 1) as u8;
       }
-      else if if endPos.x + 2 < 8 && endPos.y as i8 - 1 >= 0 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'n'} else {true == false} {
+      else if if endPos.x + 2 < 8 && endPos.y as i8 - 1 >= 0 { board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'n' && board.tile[(endPos.x as i8 + 2) as usize][(endPos.y as i8 - 1)as usize].colour == player} else {true == false} {
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 + 2) as u8; startPos.y = (endPos.y as i8 - 1) as u8;
       }
-      else if if endPos.x as i8 - 2 >= 0 && endPos.y + 1 < 8 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'n'} else {true == false} {
+      else if if endPos.x as i8 - 2 >= 0 && endPos.y + 1 < 8 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 + 1)as usize].peice == 'n' && board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 + 1)as usize].colour == player} else {true == false} {
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 - 2) as u8; startPos.y = (endPos.y as i8 + 1) as u8;
       }
-      else if if endPos.x as i8 - 2 >= 0 && endPos.y as i8 - 1 >= 0 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'n'} else { true == false} {
+      else if if endPos.x as i8 - 2 >= 0 && endPos.y as i8 - 1 >= 0 { board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 - 1)as usize].peice == 'n' && board.tile[(endPos.x as i8 - 2) as usize][(endPos.y as i8 - 1)as usize].colour == player} else { true == false} {
         startPos.peice = 'n'; startPos.x = (endPos.x as i8 - 2) as u8; startPos.y = (endPos.y as i8 - 1) as u8;
       }
     }//knight allowed
