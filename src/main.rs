@@ -24,6 +24,8 @@ struct Displace{
     peice : char, //stores the peice being moved and the susses of the return value
     x : u8, //stores coords
     y : u8, //stores coords
+    ambigX : u8, //used to resolve abisuas moves
+    ambigY : u8,
 }
 
 #[derive(Copy, Clone)]
@@ -297,7 +299,7 @@ fn checkQMB(board : &Board, mut startPos : Displace, endPos : &Displace, mut pla
 
 fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
 
-    let mut startPos = Displace{peice : 'f', x : 8, y : 8};
+    let mut startPos = Displace{peice : 'f', x : 8, y : 8, ambigX : 8, ambigY : 8};
     let player : u8;
     let openent : u8;
     let direc : i8;
@@ -598,8 +600,8 @@ fn main() {
     let running = true;
     let mut board = Board::new();
     let mut moveAccepted = true;
-    let mut turn = Displace {peice : ' ', x : 9, y : 9};
-    let mut end = Displace {peice: ' ', x:1, y: 1};
+    let mut turn = Displace {peice : ' ', x : 9, y : 9, ambigX : 9, ambigY : 9};
+    let mut end = Displace {peice: ' ', x:1, y: 1, ambigX : 9, ambigY : 9};
     let mut oldstate = board.clone();
 
     let mut sphere = nextTake(&board);
@@ -637,6 +639,23 @@ fn main() {
             if turn.x <= 7 && turn.y <= 7 && (turn.peice == 'R' || turn.peice == 'N' || turn.peice == 'B' || turn.peice == 'Q' || turn.peice == 'K' ){ //checks allowed
                 moveAccepted = board.checkColour(&turn)
             }else{moveAccepted = false;}
+        }else if play.len() == 4{
+            turn.peice = play.as_bytes()[0] as char;
+            turn.x = play.as_bytes()[2] as u8; turn.x -= 97;
+            turn.y = play.as_bytes()[3] as u8; turn.y -= 49;
+
+            if play.as_bytes()[1] as u8 - 97 >= 0 && play.as_bytes()[1] as u8 -97 < 8{
+                turn.ambigX = play.as_bytes()[1] as u8 - 97;
+            }else if play.as_bytes()[1] as u8 - 49 >= 0 && play.as_bytes()[1] as u8 - 49 < 8{
+                turn.ambigY = play.as_bytes()[1] as u8 - 49;
+            }
+        }else if play.len() == 5{
+            turn.peice = play.as_bytes()[0] as char;
+            turn.ambigX = play.as_bytes()[1] as u8; turn.x -= 97;
+            turn.ambigY = play.as_bytes()[2] as u8; turn.y -= 49;
+            turn.x = play.as_bytes()[3] as u8; turn.x -= 97;
+            turn.y = play.as_bytes()[4] as u8; turn.y -= 49;
+
         }else if play == "exit"{ break; }
         else{moveAccepted = false;}
 
