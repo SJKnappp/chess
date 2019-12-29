@@ -12,13 +12,14 @@ pub mod minmaxAi;
 
 
 //checks allowed move for queen bishop and rook
-fn checkQMB(board : &minmaxAi::Board, mut startVec : Vec<minmaxAi::Displace>, endPos : &minmaxAi::Displace, mut player : u8, mut peice : char, mut checkU : bool, mut checkD : bool, mut checkL : bool, mut checkR : bool, mut checkNE : bool, mut checkSE : bool, mut checkSW : bool, mut checkNW : bool) -> minmaxAi::Displace {
+fn checkQMB(board : &minmaxAi::Board, mut startVec : Vec<minmaxAi::Displace>, endPos : &minmaxAi::Displace, mut player : u8, mut peice : char, mut checkU : bool, mut checkD : bool, mut checkL : bool, mut checkR : bool, mut checkNE : bool, mut checkSE : bool, mut checkSW : bool, mut checkNW : bool) -> Vec<minmaxAi::Displace> {
     let mut startPos = minmaxAi::Displace::new();
     for i in 0..8{
             if checkU == true && endPos.y + i < 8 {
                 if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == ' ' {} //pass on if empty tile
                 else if board.tile[endPos.x as usize][(endPos.y+i )as usize].peice == peice && board.tile[endPos.x as usize][(endPos.y+i) as usize].colour == player { //checks that direction equual to peice and colour
                      startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y + i) as u8; //intial location of peice
+                     startVec.push(startPos);
                 }else {checkU = false}
             }else{checkU = false}//Up
 
@@ -26,6 +27,7 @@ fn checkQMB(board : &minmaxAi::Board, mut startVec : Vec<minmaxAi::Displace>, en
                 if board.tile[endPos.x as usize][(endPos.y-i) as usize].peice == ' ' {}
                 else if board.tile[endPos.x as usize][(endPos.y-i) as usize].peice == peice && board.tile[endPos.x as usize][(endPos.y-i) as usize].colour == player {
                      startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y - i) as u8;
+                     startVec.push(startPos);
                 }else {checkD = false}
             }else{checkD = false}//Down
 
@@ -33,6 +35,7 @@ fn checkQMB(board : &minmaxAi::Board, mut startVec : Vec<minmaxAi::Displace>, en
                 if board.tile[(endPos.x + i) as usize][endPos.y as usize].peice == ' ' {}
                 else if board.tile[(endPos.x+i) as usize][endPos.y as usize].peice == peice && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player {
                      startPos.peice = 's'; startPos.x = (endPos.x + i) as u8; startPos.y = endPos.y;
+                     startVec.push(startPos);
                 }else {checkR = false}
             }else{checkR = false}//Right
 
@@ -40,6 +43,7 @@ fn checkQMB(board : &minmaxAi::Board, mut startVec : Vec<minmaxAi::Displace>, en
                 if board.tile[(endPos.x - i) as usize][endPos.y as usize].peice == ' ' {}
                 else if board.tile[(endPos.x-i) as usize][endPos.y as usize].peice == peice && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player{
                      startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = endPos.y;
+                     startVec.push(startPos);
                 }else {checkL = false}
             }else{checkL = false}//Left
 
@@ -47,6 +51,7 @@ fn checkQMB(board : &minmaxAi::Board, mut startVec : Vec<minmaxAi::Displace>, en
                 if board.tile[(endPos.x + i) as usize][(endPos.y + i) as usize].peice == ' ' {}
                 else if board.tile[(endPos.x + i) as usize][(endPos.y + i) as usize].peice == peice && board.tile[(endPos.x + i) as usize][(endPos.y + i ) as usize].colour == player{
                      startPos.peice = 's'; startPos.x = (endPos.x + i) as u8; startPos.y = (endPos.y + i ) as u8;
+                     startVec.push(startPos);
                 }else {checkNE = false}
             }else{checkNE = false}//NE
 
@@ -54,6 +59,7 @@ fn checkQMB(board : &minmaxAi::Board, mut startVec : Vec<minmaxAi::Displace>, en
                 if board.tile[(endPos.x + i) as usize][(endPos.y - i) as usize].peice == ' ' {}
                 else if board.tile[(endPos.x + i) as usize][(endPos.y - i) as usize].peice == peice && board.tile[(endPos.x + i) as usize][(endPos.y - i) as usize].colour == player{
                      startPos.peice = 's'; startPos.x = (endPos.x + i) as u8; startPos.y = (endPos.y - i) as u8;
+                     startVec.push(startPos);
                 }else {checkSE = false}
             }else{checkSE = false}//SE
 
@@ -61,6 +67,7 @@ fn checkQMB(board : &minmaxAi::Board, mut startVec : Vec<minmaxAi::Displace>, en
                 if board.tile[(endPos.x - i) as usize][(endPos.y - i ) as usize].peice == ' ' {}
                 else if board.tile[(endPos.x - i) as usize][(endPos.y - i) as usize].peice == peice && board.tile[(endPos.x - i) as usize][(endPos.y - i) as usize].colour == player{
                      startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = (endPos.y - i) as u8;
+                     startVec.push(startPos);
                 }else {checkSW = false}
             }else{checkSW = false}//SW
 
@@ -68,10 +75,11 @@ fn checkQMB(board : &minmaxAi::Board, mut startVec : Vec<minmaxAi::Displace>, en
                 if board.tile[(endPos.x - i) as usize][(endPos.y + i) as usize].peice == ' ' {}
                 else if board.tile[(endPos.x - i) as usize][(endPos.y + i) as usize].peice == peice && board.tile[(endPos.x - i) as usize][(endPos.y + i) as usize].colour == player{
                      startPos.peice = 's'; startPos.x = (endPos.x - i) as u8; startPos.y = (endPos.y + i);
+                     startVec.push(startPos);
                 }else {checkNW = false}
             }else{checkNW = false}//NW
         }
-    return startPos;
+    return startVec;
 }
 
 fn resolve_Ambig(startPos : &Vec<minmaxAi::Displace>, endPos : &minmaxAi::Displace) -> minmaxAi::Displace{
@@ -173,7 +181,7 @@ fn checkallowed(board : &minmaxAi::Board, endPos : &minmaxAi::Displace) -> minma
         } //en possion right
     }//pawn allowed
 
-    else if endPos.peice == 'R' { startPos = checkQMB(&board, startVec, &endPos, player, 'R', true, true, true, true, false, false, false, false); }//rook allowed
+    else if endPos.peice == 'R' { startVec = checkQMB(&board, startVec, &endPos, player, 'R', true, true, true, true, false, false, false, false); }//rook allowed
 
     else if endPos.peice == 'N' {
       if if endPos.x + 1 < 8 && endPos.y + 2 < 8 { board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 + 2)as usize].peice == 'N' && board.tile[(endPos.x as i8 + 1) as usize][(endPos.y as i8 + 2)as usize].colour == player} else {true == false} {
@@ -210,8 +218,8 @@ fn checkallowed(board : &minmaxAi::Board, endPos : &minmaxAi::Displace) -> minma
       }
     }//knight allowed
 
-    else if endPos.peice == 'B' { startPos = checkQMB(&board, startVec, &endPos, player, 'B', false, false, false, false, true, true, true, true); } //bishop
-    else if endPos.peice == 'Q' { startPos = checkQMB(&board, startVec, &endPos, player, 'Q', true, true, true, true, true, true, true, true); } //queen
+    else if endPos.peice == 'B' { startVec = checkQMB(&board, startVec, &endPos, player, 'B', false, false, false, false, true, true, true, true); } //bishop
+    else if endPos.peice == 'Q' { startVec = checkQMB(&board, startVec, &endPos, player, 'Q', true, true, true, true, true, true, true, true); } //queen
     else if endPos.peice == 'K' {
         if board.tile[endPos.x as usize][(endPos.y + 1) as usize].peice == 'K' && board.tile[endPos.x as usize][(endPos.y + 1) as usize].colour == player {
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + 1) as u8;

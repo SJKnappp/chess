@@ -26,13 +26,7 @@ pub struct Displace{
 
 impl Displace{
     pub fn new() -> Displace{
-        let mut displace : Displace;
-
-        displace.x = 0;
-        displace.y = 0;
-        displace.ambigX = 0;
-        displace.ambigY = 0;
-        displace.moveStr = [' ';5];
+        let mut displace = Displace { peice : ' ', x : 0, y : 0, ambigX : 0, ambigY : 0, moveStr : [' '; 5]};
 
         return displace;
     }
