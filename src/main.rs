@@ -9,10 +9,10 @@ use std::{io};
 
 
 pub mod minmaxAi;
-pub mod dataStructs;
+
 
 //checks allowed move for queen bishop and rook
-fn checkQMB(board : &Board, mut startPos : Displace, endPos : &Displace, mut player : u8, mut peice : char, mut checkU : bool, mut checkD : bool, mut checkL : bool, mut checkR : bool, mut checkNE : bool, mut checkSE : bool, mut checkSW : bool, mut checkNW : bool) -> Displace {
+fn checkQMB(board : &minmaxAi::Board, mut startPos : minmaxAi::Displace, endPos : &minmaxAi::Displace, mut player : u8, mut peice : char, mut checkU : bool, mut checkD : bool, mut checkL : bool, mut checkR : bool, mut checkNE : bool, mut checkSE : bool, mut checkSW : bool, mut checkNW : bool) -> minmaxAi::Displace {
     for i in 0..8{
             if checkU == true && endPos.y + i < 8 {
                 if board.tile[endPos.x as usize][(endPos.y+i) as usize].peice == ' ' {} //pass on if empty tile
@@ -73,11 +73,11 @@ fn checkQMB(board : &Board, mut startPos : Displace, endPos : &Displace, mut pla
     return startPos;
 }
 
-fn resolve_Ambig(startPos : &Vec<Displace>, endPos : &Displace) -> Displace{
+fn resolve_Ambig(startPos : &Vec<minmaxAi::Displace>, endPos : &minmaxAi::Displace) -> minmaxAi::Displace{
     print!("amb {} ", startPos.len());
-    let mut intial = Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8, moveStr : [' '; 5]};
+    let mut intial = minmaxAi::Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8, moveStr : [' '; 5]};
     let mut temp = intial.clone();
-    let mut allowed : Vec<Displace> = Vec::new();
+    let mut allowed : Vec<minmaxAi::Displace> = Vec::new();
     let mut ambigResolved = false; //solved ambiguatiy
     let mut ambigResolvedX = false;
     let mut ambigResolvedY = false;
@@ -124,10 +124,10 @@ fn resolve_Ambig(startPos : &Vec<Displace>, endPos : &Displace) -> Displace{
     return intial;
 }
 
-fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
+fn checkallowed(board : &minmaxAi::Board, endPos : &minmaxAi::Displace) -> minmaxAi::Displace{
 
-    let mut startPos = Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8, moveStr : [' ';5]};
-    let mut startVec : Vec<Displace> = Vec::new();
+    let mut startPos = minmaxAi::Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8, moveStr : [' ';5]};
+    let mut startVec : Vec<minmaxAi::Displace> = Vec::new();
     let player : u8;
     let openent : u8;
     let direc : i8;
@@ -250,7 +250,7 @@ fn checkallowed(board : &Board, endPos : &Displace) -> Displace{
     return startPos;
 }
 
-fn nextMovers(board : &Board, mut result : [[i8;8];8] ,xCord : usize, yCord : usize, colour : &u8 , mut Up : bool, mut Do :bool, mut Le : bool, mut Ri : bool, mut NE : bool, mut SE : bool, mut SW : bool, mut NW : bool) -> [[i8; 8]; 8]{
+fn nextMovers(board : &minmaxAi::Board, mut result : [[i8;8];8] ,xCord : usize, yCord : usize, colour : &u8 , mut Up : bool, mut Do :bool, mut Le : bool, mut Ri : bool, mut NE : bool, mut SE : bool, mut SW : bool, mut NW : bool) -> [[i8; 8]; 8]{
 
     for i in 1..8{
             if Up == true && xCord +i < 8 {
@@ -314,7 +314,7 @@ fn nextMovers(board : &Board, mut result : [[i8;8];8] ,xCord : usize, yCord : us
     return result;
 }
 
-fn nextNight(board : &Board, mut result : [[i8;8];8], x : &usize, y : &usize) -> [[i8;8];8]{
+fn nextNight(board : &minmaxAi::Board, mut result : [[i8;8];8], x : &usize, y : &usize) -> [[i8;8];8]{
     if *x + 2 < 8 && *y + 1 < 8 {result[x+2][y+1] +=1;}
     if *x + 2 < 8 && *y as i8 - 1 >= 0 {result[(x+2) as usize][(y-1) as usize] += 1;}
     if *x as i8 - 2 >= 0 && *y + 1 < 8 {result[(x-2) as usize][(y+1) as usize] += 1;}
@@ -328,9 +328,9 @@ fn nextNight(board : &Board, mut result : [[i8;8];8], x : &usize, y : &usize) ->
 }
 
 //array of all posible captures points in next turn note does not include all moves
-fn nextTake(board : &Board) -> [[Sphere;8];8]{
+fn nextTake(board : &minmaxAi::Board) -> [[minmaxAi::Sphere;8];8]{
 
-    let mut sphere = [[Sphere {whiteSphere : 0, blackSphere : 0};8];8];
+    let mut sphere = [[minmaxAi::Sphere {whiteSphere : 0, blackSphere : 0};8];8];
     let mut black = [[0 as i8; 8]; 8];
     let mut white = [[0 as i8; 8]; 8];
 
@@ -412,8 +412,8 @@ fn nextTake(board : &Board) -> [[Sphere;8];8]{
     return sphere;
 }
 
-fn CheckDetc(board : &Board, sphere : &[[Sphere;8];8]) -> Check{
-    let mut check = Check{white: false, black : false};
+fn CheckDetc(board : &minmaxAi::Board, sphere : &[[minmaxAi::Sphere;8];8]) -> minmaxAi::Check{
+    let mut check = minmaxAi::Check{white: false, black : false};
     let mut kingCount = 0;
     for j in 0..8{
         for i in 0..8{
@@ -434,7 +434,7 @@ fn CheckDetc(board : &Board, sphere : &[[Sphere;8];8]) -> Check{
 }
 
 //save board state to file
-fn save(board : &Board, mut endPos : Displace, mut intial : Displace) -> std::io::Result<()>{
+fn save(board : &minmaxAi::Board, mut endPos : minmaxAi::Displace, mut intial : minmaxAi::Displace) -> std::io::Result<()>{
 
     let mut count = 0;
     if endPos.peice == 'p' {} else {intial.moveStr[0] = endPos.peice; count += 1;}
@@ -458,17 +458,17 @@ fn main() {
 
     //intialise variables
     let running = true;
-    let mut board = Board::new();
+    let mut board = minmaxAi::Board::new();
     let mut moveAccepted = true;
-    let mut turn = Displace {peice : ' ', x : 8, y : 8, ambigX : 8, ambigY : 8, moveStr : [' '; 5]};
-    let mut end = Displace {peice: ' ', x:8, y: 8, ambigX : 8, ambigY : 8, moveStr : [' '; 5]};
+    let mut turn = minmaxAi::Displace {peice : ' ', x : 8, y : 8, ambigX : 8, ambigY : 8, moveStr : [' '; 5]};
+    let mut end = minmaxAi::Displace {peice: ' ', x:8, y: 8, ambigX : 8, ambigY : 8, moveStr : [' '; 5]};
     let mut oldstate = board.clone();
     let mut history =  String::new();
     let mut colour = 1;
 
     let mut sphere = nextTake(&board);
 
-    let mut check = Check{white: false, black : false};
+    let mut check = minmaxAi::Check{white: false, black : false};
 
     while running { //main loop
         if moveAccepted == true{
@@ -487,7 +487,7 @@ fn main() {
        
         if board.player == false {colour = 1;} else {colour = 2;}
 
-        minmaxAi::calcScore(board, colour, check, sphere);
+        minmaxAi::calcScore(board.clone(), colour, check, sphere);
 
         if play.len() == 2{ //checks if pawn as input 2 long
             turn.peice = 'p';
