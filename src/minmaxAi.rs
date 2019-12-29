@@ -24,6 +24,20 @@ pub struct Displace{
     pub moveStr : [char; 5],
 }
 
+impl Displace{
+    pub fn new() -> Displace{
+        let mut displace : Displace;
+
+        displace.x = 0;
+        displace.y = 0;
+        displace.ambigX = 0;
+        displace.ambigY = 0;
+        displace.moveStr = [' ';5];
+
+        return displace;
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct Piece{
     pub peice : char, //stores the peice r rock n knight b bishop q queen k king p pawn
@@ -234,33 +248,69 @@ impl Board {
 fn scores(peice : char) -> i16 {
     match peice{
         'p' => return 1,
-        'r' => return 50,
-        'n' => return 25,
-        'b' => return 30,
-        'q' => return 100,
-        'k' => return 255,
+        'R' => return 50,
+        'N' => return 25,
+        'B' => return 30,
+        'Q' => return 100,
+        'K' => return 255,
         _ => return 0,
     }
 }
 
-pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8]){
-    let mut openent : u8;
+pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool){
+    let openent : u8;
     if  colour == 1 {openent = 2;} else {openent = 1;}
     
     let mut gain : [[i16; 8]; 8] = [[0;8];8];
     let mut risk : [[i16; 8]; 8] = [[0;8];8];
 
+    let mut selfSphere : [[i8;8];8] = [[0;8];8];
+    let mut opSphere : [[i8;8];8] = [[0;8];8];
+
+    if colour == 2{
+        for j in 0..8{
+            for i in 0..8{
+                selfSphere[i][j] = sphere[i][j].whiteSphere; 
+                opSphere[i][j] = sphere[i][j].blackSphere;
+            }
+        }
+    }else {
+        for j in 0..8{
+            for i in 0..8{
+                selfSphere[i][j] = sphere[i][j].blackSphere; 
+                opSphere[i][j] = sphere[i][j].whiteSphere;
+            }
+        }
+    }
+
+    println!("calc scores");
+
+    if debug == true{
+        println!("player colour: {} ", colour);
+    }
+
     //risk current
     for j in 0..8{
         for i in 0..8 {
-            if board.tile[j][i].colour == colour{gain[i][j] += scores(board.tile[i][j].peice);}
-            if board.tile[j][i].colour == openent{risk[i][j] += scores(board.tile[i][j].peice);}
 
-            print!("{}", risk[i][j]);
+            if board.tile[i][j].colour == colour && opSphere[i][j] != 0 {risk[i][j] += opSphere[i][j] as i16 * scores(board.tile[i][j].peice);}
+            if board.tile[i][j].colour == openent && selfSphere[i][j] != 0 {gain[i][j] += selfSphere[i][j] as i16 * scores(board.tile[i][j].peice);}
+
+            if debug == true{
+            print!(" {} ", risk[i][j]);
+            }
+        }
+        if debug == true{
+            print!(" <-risk gain-> ");
+        }
+
+        if debug == true{
+        for i in 0..8{
+            print!(" {} ", gain [i][j]);
         }
         println!("");
+        }
     }
-
     
 }
 fn main() {}
