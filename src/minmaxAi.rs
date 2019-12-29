@@ -192,7 +192,7 @@ impl Board {
         return true;
     }
     //takes start and end point and kills and moves the peices
-    pub fn Swap(mut self, Final : &Displace, intial : &Displace) -> Board{
+    pub fn Swap(mut self, Final : &Displace, intial : &Displace, Ai : bool) -> Board{
 
         if self.tile[Final.x as usize][Final.y as usize].colour == 1{ //adds taken peices to taken history
                 self.takenWhite.push( self.tile[Final.x as usize][Final.y as usize].peice );
@@ -210,6 +210,7 @@ impl Board {
             }
         }
 
+        if Ai == false{ //check not ai function
         if (Final.y == 7 || Final.y == 0 )&& Final.peice =='p'{ //premottes pawn
             println!("pawn premotted please select replacement");
             let mut sucsses = true;
@@ -229,14 +230,227 @@ impl Board {
             if self.tile[intial.x as usize][intial.y as usize].peice != 'p' { break; } //if peices changed break out of loop
             }
         }
+        }
 
         self.tile[Final.x as usize][Final.y as usize].peice = self.tile[intial.x as usize][intial.y as usize].peice; //moves peice
         self.tile[Final.x as usize][Final.y as usize].colour = self.tile[intial.x as usize][intial.y as usize].colour;
+        self.tile[Final.x as usize][Final.y as usize].moved = true;
         self.tile[intial.x as usize][intial.y as usize].peice = ' '; //resets original point
         self.tile[intial.x as usize][intial.y as usize].colour = 0 ;
 
         return self;
     }
+}
+
+
+fn nextMovers(board : &Board, mut result : [[i8;8];8] ,xCord : usize, yCord : usize, colour : &u8 , mut Up : bool, mut Do :bool, mut Le : bool, mut Ri : bool, mut NE : bool, mut SE : bool, mut SW : bool, mut NW : bool) -> [[i8; 8]; 8]{
+
+    for i in 1..8{
+            if Up == true && xCord +i < 8 {
+                if board.tile[(xCord + i) as usize][yCord].colour == 0 {}
+                else {Up = false}
+                result[(xCord+i)as usize][yCord] += 1;
+            }
+            else {Up = false }
+
+            if Do == true && xCord as i8 -i as i8 >= 0 {
+                if board.tile[(xCord - i) as usize][yCord].colour == 0 {}
+                else {Do = false}
+                result[(xCord - i)as usize][yCord] += 1;
+            }
+            else {Do = false }
+
+            if Le == true && yCord as i8 - i as i8 >= 0 {
+                if board.tile[xCord][yCord - i as usize].colour == 0 {}
+                else {Le = false}
+                result[xCord][(yCord - i)as usize] += 1;
+            }
+            else {Le = false }
+
+            if Ri == true && yCord + i < 8 {
+                if board.tile[xCord][(yCord +i ) as usize].colour == 0 {}
+                else {Ri = false}
+                result[xCord][(yCord+i)as usize] += 1;
+            }
+            else {Ri = false }
+
+            if NE == true && xCord +i < 8 && yCord + i < 8 {
+                if board.tile[(xCord + i) as usize][(yCord + i) as usize].colour == 0 {}
+                else {NE = false}
+                result[(xCord+i)as usize][(yCord+i)as usize] += 1;
+            }
+            else {NE = false }
+
+            if SE == true && xCord +i < 8 && yCord as i8 - i as i8 >= 0 {
+                if board.tile[(xCord + i) as usize][(yCord - i) as usize].colour == 0 {}
+                else {SE = false}
+                result[(xCord + i)as usize][(yCord - i)as usize] += 1;
+            }
+            else {SE = false }
+
+            if SW == true && xCord as i8 - i as i8 >= 0 && yCord as i8 - i as i8 >= 0{
+                if board.tile[(xCord - i) as usize][(yCord - i) as usize].colour == 0 {}
+                else {SW = false}
+                result[(xCord-i)as usize][(yCord-i)as usize] += 1;
+            }
+            else {SW = false }
+
+            if NW == true && xCord as i8 - i as i8 >= 0 && yCord +i < 8 {
+                if board.tile[(xCord - i) as usize][(yCord +i) as usize].colour == 0 {}
+                else {NW = false}
+                result[(xCord - i)as usize][(yCord + i)as usize] += 1;
+            }
+            else {NW = false }
+
+
+    }
+    return result;
+}
+
+fn nextNight(board : &Board, mut result : [[i8;8];8], x : &usize, y : &usize) -> [[i8;8];8]{
+    if *x + 2 < 8 && *y + 1 < 8 {result[x+2][y+1] +=1;}
+    if *x + 2 < 8 && *y as i8 - 1 >= 0 {result[(x+2) as usize][(y-1) as usize] += 1;}
+    if *x as i8 - 2 >= 0 && *y + 1 < 8 {result[(x-2) as usize][(y+1) as usize] += 1;}
+    if *x as i8- 2 >= 0 && *y as i8 - 1 >= 0 {result[(x-2) as usize][(y-1) as usize] += 1;}
+    if *x + 1 < 8 && *y + 2 < 8 {result[(x+1) as usize][(y+2) as usize]+= 1;}
+    if *x as i8 - 1 >= 0 && *y + 2 < 8 {result[(x-1) as usize][(y+2) as usize]+=1;}
+    if *x + 1 < 8 && *y as i8 - 2 >= 0 {result[(x+1) as usize][(y-2) as usize]+=1;}
+    if *x as i8 - 1 >= 0 && *y as i8 - 2 >= 0 {result[(x-1) as usize][(y-2) as usize]+=1;}
+
+    return result;
+}
+
+//array of all posible captures points in next turn note does not include all moves
+pub fn nextTake(board : &Board, debug : bool) -> [[Sphere;8];8]{
+
+    let mut sphere = [[Sphere {whiteSphere : 0, blackSphere : 0};8];8];
+    let mut black = [[0 as i8; 8]; 8];
+    let mut white = [[0 as i8; 8]; 8];
+
+    for j in 0..8{
+        for i in 0..8{
+            if board.tile[i][j].peice == 'p'{
+                if board.tile[i][j].colour == 1 {
+                    if j > 0{
+                        if i < 7{ sphere[i+1][j-1].blackSphere += 1; } // ways that pawn can take
+                        if i > 0{ sphere[i-1][j-1].blackSphere += 1; }
+                    }
+                }else if board.tile[i][j].colour == 2 {
+                    if j < 7{
+                        if i < 7{ sphere[i+1][j+1].whiteSphere += 1; } // ways that pawn can take
+                        if i > 0{ sphere[i-1][j+1].whiteSphere += 1; }
+                    }
+                }
+
+            }
+            else if board.tile[i][j].peice == 'R'{
+                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, true, true, true, true, false, false, false, false); }
+                else {white = nextMovers(board, white, i, j, &2, true, true, true, true, false, false, false, false); }
+
+            }
+            else if board.tile[i][j].peice == 'N'{
+                if board.tile[i][j].colour == 1{ black = nextNight(board, black, &i, &j); }
+                else { white = nextNight(board, white, &i, &j); }
+            }
+            else if board.tile[i][j].peice == 'B'{
+                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, false, false, false, false, true, true, true, true); }
+                else {white = nextMovers(board, white, i, j, &2, false, false, false, false, true, true, true, true); }
+            }
+
+            else if board.tile[i][j].peice == 'Q'{
+                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, true, true, true, true, true, true, true, true); }
+                else {white = nextMovers(board, white, i, j, &2, true, true, true, true, true, true, true, true); }
+            }
+
+            else if board.tile[i][j].peice == 'K'{
+                if board.tile[i][j].colour == 1 {
+                    if i > 0 {sphere[i-1][j].blackSphere += 1;}
+                    if j < 7 {sphere[i+1][j].blackSphere += 1;}
+                    if i > 0 && j > 0 {sphere[i-1][j-1].blackSphere += 1;}
+                    if i > 0 && j < 7 {sphere[i-1][j+1].blackSphere += 1;}
+                    if i < 7 && j > 0 {sphere[i+1][j-1].blackSphere += 1;}
+                    if i < 7 && j < 7 {sphere[i+1][j+1].blackSphere += 1;}
+                    if j > 0 {sphere[i][j-1].blackSphere += 1;}
+                    if j < 7 {sphere[i][j+1].blackSphere += 1;}
+                }else if board.tile[i][j].colour == 1 {
+                    if i > 0 {sphere[i-1][j].whiteSphere += 1;}
+                    if j < 7 {sphere[i+1][j].whiteSphere += 1;}
+                    if i > 0 && j > 0 {sphere[i-1][j-1].whiteSphere += 1;}
+                    if i > 0 && j < 7 {sphere[i-1][j+1].whiteSphere += 1;}
+                    if i < 7 && j > 0 {sphere[i+1][j-1].whiteSphere += 1;}
+                    if i < 7 && j < 7 {sphere[i+1][j+1].whiteSphere += 1;}
+                    if j > 0 {sphere[i][j-1].whiteSphere += 1;}
+                    if j < 7 {sphere[i][j+1].whiteSphere += 1;}
+                }
+            }
+        }
+    }
+
+    for j in 0..8{
+        for i in 0..8{
+            sphere[i][j].whiteSphere += white[i][j];
+            sphere[i][j].blackSphere += black[i][j];
+
+            if debug == true{
+                print!("{} ", sphere[i][j].blackSphere);
+            }
+        }
+
+        if debug == true {
+        print!("   ");
+
+        for i in 0..8{
+            print!("{} ", sphere[i][j].whiteSphere);
+        }
+            println!("")
+        }
+    }
+
+    return sphere;
+}
+
+pub fn CheckDetc(board : &Board, sphere : &[[Sphere;8];8]) -> Check{
+    let mut check = Check{white: false, black : false};
+    let mut kingCount = 0;
+    for j in 0..8{
+        for i in 0..8{
+            if board.tile[i][j].peice == 'K'{
+                kingCount += 1;
+                if board.tile[i][j].colour == 1 && sphere[i][j].whiteSphere > 0 {
+                    println!("black check");
+                    check.black = true;
+                }else if board.tile[i][j].colour == 2 && sphere[i][j].blackSphere > 0 {
+                    println!("white check");
+                    check.white = true;
+                }
+            }
+        }
+        if kingCount == 2{return check;}
+    }
+    return check;
+}
+
+
+
+
+
+pub struct AiScoreTrack {
+    pub reward : isize,
+    pub risk : isize
+}
+impl AiScoreTrack{
+    fn new() -> AiScoreTrack{
+        let aiScoreTrack = AiScoreTrack{reward : 0, risk :0};
+        return aiScoreTrack;
+    }
+}
+
+
+pub fn AiCall(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool){
+    let mut scoreTrack = AiScoreTrack{reward : 0, risk : 0};
+    possibleMoves(&board, colour, colour, debug, 0, 1, 0);
+    println!("returned saftley");
+    calcScore(board.clone(), colour, check, sphere, debug);
 }
 
 fn scores(peice : char) -> i16 {
@@ -251,28 +465,31 @@ fn scores(peice : char) -> i16 {
     }
 }
 
-pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool){
+pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool) -> AiScoreTrack{
+
+    let mut scoreTrack = AiScoreTrack{reward : 0, risk : 0};
+
     let openent : u8;
     if  colour == 1 {openent = 2;} else {openent = 1;}
     
-    let mut gain : [[i16; 8]; 8] = [[0;8];8];
-    let mut risk : [[i16; 8]; 8] = [[0;8];8];
+    let mut gain : [[i32; 8]; 8] = [[0;8];8];
+    let mut risk : [[i32; 8]; 8] = [[0;8];8];
 
-    let mut selfSphere : [[i8;8];8] = [[0;8];8];
-    let mut opSphere : [[i8;8];8] = [[0;8];8];
+    let mut selfSphere : [[i32;8];8] = [[0;8];8];
+    let mut opSphere : [[i32;8];8] = [[0;8];8];
 
     if colour == 2{
         for j in 0..8{
             for i in 0..8{
-                selfSphere[i][j] = sphere[i][j].whiteSphere; 
-                opSphere[i][j] = sphere[i][j].blackSphere;
+                selfSphere[i][j] = sphere[i][j].whiteSphere as i32; 
+                opSphere[i][j] = sphere[i][j].blackSphere as i32;
             }
         }
     }else {
         for j in 0..8{
             for i in 0..8{
-                selfSphere[i][j] = sphere[i][j].blackSphere; 
-                opSphere[i][j] = sphere[i][j].whiteSphere;
+                selfSphere[i][j] = sphere[i][j].blackSphere as i32; 
+                opSphere[i][j] = sphere[i][j].whiteSphere as i32;
             }
         }
     }
@@ -287,12 +504,18 @@ pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8]
     for j in 0..8{
         for i in 0..8 {
 
-            if board.tile[i][j].colour == colour && opSphere[i][j] != 0 {risk[i][j] += opSphere[i][j] as i16 * scores(board.tile[i][j].peice);}
-            if board.tile[i][j].colour == openent && selfSphere[i][j] != 0 {gain[i][j] += selfSphere[i][j] as i16 * scores(board.tile[i][j].peice);}
+            if board.tile[i][j].colour == colour && opSphere[i][j] != 0 {
+                risk[i][j] += opSphere[i][j] * scores(board.tile[i][j].peice) as i32;
+                scoreTrack.risk += risk[i][j] as isize;
+            }
+            if board.tile[i][j].colour == openent && selfSphere[i][j] != 0 {
+                gain[i][j] += selfSphere[i][j] * scores(board.tile[i][j].peice) as i32;
+                scoreTrack.reward += gain[i][j] as isize;
+            }
 
             if debug == true{
             print!(" {} ", risk[i][j]);
-            }
+            }   
         }
         if debug == true{
             print!(" <-risk gain-> ");
@@ -305,6 +528,88 @@ pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8]
         println!("");
         }
     }
+
+    return scoreTrack;
     
 }
+
+fn possibleMoves(board : &Board, player : u8,colour : u8, mut debug : bool, mut down : u8, depth : u8, mut scoreTrack : isize) -> isize{
+
+    println!("test");
+
+    if player == colour{
+        down += 1;
+    }
+
+   
+
+    let mut intial = Displace::new();
+    let mut Final = Displace::new();
+    let mut trial = board.clone();
+    let mut aiScoreTrack : AiScoreTrack;
+    let mut openent;
+
+    let mut moveable = [[false; 8]; 8];
+    let direc : i8;
+    if colour == 1 {direc = -1; openent = 2;} else {direc = 1; openent = 1;}
+
+    if down == depth{
+        return scoreTrack;
+    }
+    
+
+    for j in 0..8{
+        for i in 0..8{
+            if board.tile[i][j].colour == colour{
+                if board.tile[i][j].peice == 'p' {
+                if j != 7 && j != 0 && board.tile[i ][(j as i8 + direc) as usize].colour == 0 {
+                    print!("test posible ln 557 {}{} down:{} ", i, j, down);
+                    intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as i8 + direc) as u8;
+                    trial = trial.Swap( &Final, &intial, true);
+                    if down == 0 {
+                        scoreTrack = possibleMoves(&trial.clone(), player, colour, debug, down, depth, scoreTrack);
+                    }else{
+                    scoreTrack += possibleMoves(&trial.clone(), player, openent, debug, down, depth, scoreTrack);
+                    }
+
+                    println!("\n test1 {} depth {} ", scoreTrack, down);
+                }
+                if board.tile[i][j].moved == false && i != 7 && i != 0 && board.tile[i][(j as i8 + direc) as usize].colour == 0{
+                    print!("test posible ln 564 {}{} down:{}   ", i, j, down);
+                    intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as i8 + direc) as u8;
+                    trial = trial.Swap(&Final, &intial, true);
+                    if down == 0{
+                        scoreTrack += possibleMoves(&trial.clone(), player, openent, debug, down, depth, scoreTrack);
+                    }else{
+                        scoreTrack += possibleMoves(&trial.clone(), player, openent, debug, down, depth, scoreTrack);
+                    }
+                    println!("\n test2 {} depth {} ", scoreTrack, down);
+                }
+                }
+            }
+        }
+    }
+
+    let sphere = nextTake(&board, false);
+    let check = CheckDetc(&board, &sphere);
+
+
+    aiScoreTrack = calcScore(board.clone(), colour, check, sphere, debug);
+    
+
+    println!(" {}  {}  ", aiScoreTrack.reward, aiScoreTrack.risk);
+
+    scoreTrack += aiScoreTrack.reward - aiScoreTrack.risk;
+
+    print!("{}",scoreTrack );
+
+    println!("test   ");
+    return scoreTrack;
+    
+}
+
+fn BoardScore(){
+
+}
+
 fn main() {}

@@ -261,192 +261,9 @@ fn checkallowed(board : &minmaxAi::Board, endPos : &minmaxAi::Displace) -> minma
     return startPos;
 }
 
-fn nextMovers(board : &minmaxAi::Board, mut result : [[i8;8];8] ,xCord : usize, yCord : usize, colour : &u8 , mut Up : bool, mut Do :bool, mut Le : bool, mut Ri : bool, mut NE : bool, mut SE : bool, mut SW : bool, mut NW : bool) -> [[i8; 8]; 8]{
-
-    for i in 1..8{
-            if Up == true && xCord +i < 8 {
-                if board.tile[(xCord + i) as usize][yCord].colour == 0 {}
-                else {Up = false}
-                result[(xCord+i)as usize][yCord] += 1;
-            }
-            else {Up = false }
-
-            if Do == true && xCord as i8 -i as i8 >= 0 {
-                if board.tile[(xCord - i) as usize][yCord].colour == 0 {}
-                else {Do = false}
-                result[(xCord - i)as usize][yCord] += 1;
-            }
-            else {Do = false }
-
-            if Le == true && yCord as i8 - i as i8 >= 0 {
-                if board.tile[xCord][yCord - i as usize].colour == 0 {}
-                else {Le = false}
-                result[xCord][(yCord - i)as usize] += 1;
-            }
-            else {Le = false }
-
-            if Ri == true && yCord + i < 8 {
-                if board.tile[xCord][(yCord +i ) as usize].colour == 0 {}
-                else {Ri = false}
-                result[xCord][(yCord+i)as usize] += 1;
-            }
-            else {Ri = false }
-
-            if NE == true && xCord +i < 8 && yCord + i < 8 {
-                if board.tile[(xCord + i) as usize][(yCord + i) as usize].colour == 0 {}
-                else {NE = false}
-                result[(xCord+i)as usize][(yCord+i)as usize] += 1;
-            }
-            else {NE = false }
-
-            if SE == true && xCord +i < 8 && yCord as i8 - i as i8 >= 0 {
-                if board.tile[(xCord + i) as usize][(yCord - i) as usize].colour == 0 {}
-                else {SE = false}
-                result[(xCord + i)as usize][(yCord - i)as usize] += 1;
-            }
-            else {SE = false }
-
-            if SW == true && xCord as i8 - i as i8 >= 0 && yCord as i8 - i as i8 >= 0{
-                if board.tile[(xCord - i) as usize][(yCord - i) as usize].colour == 0 {}
-                else {SW = false}
-                result[(xCord-i)as usize][(yCord-i)as usize] += 1;
-            }
-            else {SW = false }
-
-            if NW == true && xCord as i8 - i as i8 >= 0 && yCord +i < 8 {
-                if board.tile[(xCord - i) as usize][(yCord +i) as usize].colour == 0 {}
-                else {NW = false}
-                result[(xCord - i)as usize][(yCord + i)as usize] += 1;
-            }
-            else {NW = false }
 
 
-    }
-    return result;
-}
 
-fn nextNight(board : &minmaxAi::Board, mut result : [[i8;8];8], x : &usize, y : &usize) -> [[i8;8];8]{
-    if *x + 2 < 8 && *y + 1 < 8 {result[x+2][y+1] +=1;}
-    if *x + 2 < 8 && *y as i8 - 1 >= 0 {result[(x+2) as usize][(y-1) as usize] += 1;}
-    if *x as i8 - 2 >= 0 && *y + 1 < 8 {result[(x-2) as usize][(y+1) as usize] += 1;}
-    if *x as i8- 2 >= 0 && *y as i8 - 1 >= 0 {result[(x-2) as usize][(y-1) as usize] += 1;}
-    if *x + 1 < 8 && *y + 2 < 8 {result[(x+1) as usize][(y+2) as usize]+= 1;}
-    if *x as i8 - 1 >= 0 && *y + 2 < 8 {result[(x-1) as usize][(y+2) as usize]+=1;}
-    if *x + 1 < 8 && *y as i8 - 2 >= 0 {result[(x+1) as usize][(y-2) as usize]+=1;}
-    if *x as i8 - 1 >= 0 && *y as i8 - 2 >= 0 {result[(x-1) as usize][(y-2) as usize]+=1;}
-
-    return result;
-}
-
-//array of all posible captures points in next turn note does not include all moves
-fn nextTake(board : &minmaxAi::Board, debug : bool) -> [[minmaxAi::Sphere;8];8]{
-
-    let mut sphere = [[minmaxAi::Sphere {whiteSphere : 0, blackSphere : 0};8];8];
-    let mut black = [[0 as i8; 8]; 8];
-    let mut white = [[0 as i8; 8]; 8];
-
-    for j in 0..8{
-        for i in 0..8{
-            if board.tile[i][j].peice == 'p'{
-                if board.tile[i][j].colour == 1 {
-                    if j > 0{
-                        if i < 7{ sphere[i+1][j-1].blackSphere += 1; } // ways that pawn can take
-                        if i > 0{ sphere[i-1][j-1].blackSphere += 1; }
-                    }
-                }else if board.tile[i][j].colour == 2 {
-                    if j < 7{
-                        if i < 7{ sphere[i+1][j+1].whiteSphere += 1; } // ways that pawn can take
-                        if i > 0{ sphere[i-1][j+1].whiteSphere += 1; }
-                    }
-                }
-
-            }
-            else if board.tile[i][j].peice == 'R'{
-                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, true, true, true, true, false, false, false, false); }
-                else {white = nextMovers(board, white, i, j, &2, true, true, true, true, false, false, false, false); }
-
-            }
-            else if board.tile[i][j].peice == 'N'{
-                if board.tile[i][j].colour == 1{ black = nextNight(board, black, &i, &j); }
-                else { white = nextNight(board, white, &i, &j); }
-            }
-            else if board.tile[i][j].peice == 'B'{
-                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, false, false, false, false, true, true, true, true); }
-                else {white = nextMovers(board, white, i, j, &2, false, false, false, false, true, true, true, true); }
-            }
-
-            else if board.tile[i][j].peice == 'Q'{
-                if board.tile[i][j].colour == 1{ black = nextMovers(board, black, i, j, &1, true, true, true, true, true, true, true, true); }
-                else {white = nextMovers(board, white, i, j, &2, true, true, true, true, true, true, true, true); }
-            }
-
-            else if board.tile[i][j].peice == 'K'{
-                if board.tile[i][j].colour == 1 {
-                    if i > 0 {sphere[i-1][j].blackSphere += 1;}
-                    if j < 7 {sphere[i+1][j].blackSphere += 1;}
-                    if i > 0 && j > 0 {sphere[i-1][j-1].blackSphere += 1;}
-                    if i > 0 && j < 7 {sphere[i-1][j+1].blackSphere += 1;}
-                    if i < 7 && j > 0 {sphere[i+1][j-1].blackSphere += 1;}
-                    if i < 7 && j < 7 {sphere[i+1][j+1].blackSphere += 1;}
-                    if j > 0 {sphere[i][j-1].blackSphere += 1;}
-                    if j < 7 {sphere[i][j+1].blackSphere += 1;}
-                }else if board.tile[i][j].colour == 1 {
-                    if i > 0 {sphere[i-1][j].whiteSphere += 1;}
-                    if j < 7 {sphere[i+1][j].whiteSphere += 1;}
-                    if i > 0 && j > 0 {sphere[i-1][j-1].whiteSphere += 1;}
-                    if i > 0 && j < 7 {sphere[i-1][j+1].whiteSphere += 1;}
-                    if i < 7 && j > 0 {sphere[i+1][j-1].whiteSphere += 1;}
-                    if i < 7 && j < 7 {sphere[i+1][j+1].whiteSphere += 1;}
-                    if j > 0 {sphere[i][j-1].whiteSphere += 1;}
-                    if j < 7 {sphere[i][j+1].whiteSphere += 1;}
-                }
-            }
-        }
-    }
-
-    for j in 0..8{
-        for i in 0..8{
-            sphere[i][j].whiteSphere += white[i][j];
-            sphere[i][j].blackSphere += black[i][j];
-
-            if debug == true{
-                print!("{} ", sphere[i][j].blackSphere);
-            }
-        }
-
-        if debug == true {
-        print!("   ");
-
-        for i in 0..8{
-            print!("{} ", sphere[i][j].whiteSphere);
-        }
-            println!("")
-        }
-    }
-
-    return sphere;
-}
-
-fn CheckDetc(board : &minmaxAi::Board, sphere : &[[minmaxAi::Sphere;8];8]) -> minmaxAi::Check{
-    let mut check = minmaxAi::Check{white: false, black : false};
-    let mut kingCount = 0;
-    for j in 0..8{
-        for i in 0..8{
-            if board.tile[i][j].peice == 'K'{
-                kingCount += 1;
-                if board.tile[i][j].colour == 1 && sphere[i][j].whiteSphere > 0 {
-                    println!("black check");
-                    check.black = true;
-                }else if board.tile[i][j].colour == 2 && sphere[i][j].blackSphere > 0 {
-                    println!("white check");
-                    check.white = true;
-                }
-            }
-        }
-        if kingCount == 2{return check;}
-    }
-    return check;
-}
 
 //save board state to file
 fn save(board : &minmaxAi::Board, mut endPos : minmaxAi::Displace, mut intial : minmaxAi::Displace) -> std::io::Result<()>{
@@ -482,7 +299,7 @@ fn main() {
     let mut colour = 1;
     let mut debug = false;
 
-    let mut sphere = nextTake(&board, debug);
+    let mut sphere = minmaxAi::nextTake(&board, debug);
 
     let mut check = minmaxAi::Check{white: false, black : false};
 
@@ -491,7 +308,7 @@ fn main() {
             if board.player == true{board.player = false; }else{board.player = true;} //player
             board.print();
 
-            check = CheckDetc(&board, &sphere);
+            check = minmaxAi::CheckDetc(&board, &sphere);
 
             print!("player: {} please make your move:  \n", if board.player == true { "white" }else {"black"}); //player turn
 
@@ -503,7 +320,7 @@ fn main() {
        
         if board.player == false {colour = 1;} else {colour = 2;}
 
-        minmaxAi::calcScore(board.clone(), colour, check, sphere, debug); //Ai test function
+        minmaxAi::AiCall(board.clone(), colour, check, sphere, debug); //Ai test function
 
         if play == "exit"{ break; }
         else if play == "debug" {debug = true; moveAccepted = false; println!("debug mode on"); turn.x =8; turn.y = 8;}
@@ -557,10 +374,10 @@ fn main() {
         }
 
         if moveAccepted == true { //moves the peices
-            board = board.Swap(&turn, &end);
+            board = board.Swap(&turn, &end, false);
 
-            sphere = nextTake(&board, debug);
-            check = CheckDetc(&board, &sphere);
+            sphere = minmaxAi::nextTake(&board, debug);
+            check = minmaxAi::CheckDetc(&board, &sphere);
 
             //detects in player is in check
             if board.player == true && check.white == true{
