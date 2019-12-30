@@ -314,7 +314,7 @@ fn main() {
             if board.player == true{board.player = false; }else{board.player = true;} //player
             board.print();
 
-            check = minmaxAi::CheckDetc(&board, &sphere);
+            check = minmaxAi::CheckDetc(&board, &sphere, false);
 
             print!("player: {} please make your move:  \n", if board.player == true { "white" }else {"black"}); //player turn
             if board.player == false {colour = 1;} else {colour = 2;}
@@ -385,7 +385,7 @@ fn main() {
             board = board.Swap(&turn, &end, false);
 
             sphere = minmaxAi::nextTake(&board, debug);
-            check = minmaxAi::CheckDetc(&board, &sphere);
+            check = minmaxAi::CheckDetc(&board, &sphere, false);
 
             //detects in player is in check
             if board.player == true && check.white == true{

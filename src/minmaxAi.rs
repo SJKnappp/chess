@@ -1,6 +1,7 @@
 use std::fs::File;
 use ansi_term::Colour::{Red, White};
-use std::{io};
+use std::{io, thread, time::Duration};
+
 
 #[derive(Copy, Clone)]
 pub struct Check{
@@ -213,17 +214,17 @@ impl Board {
         if Ai == false{ //check not ai function
         if (Final.y == 7 || Final.y == 0 )&& Final.peice =='p'{ //premottes pawn
             println!("pawn premotted please select replacement");
-            let mut sucsses = true;
+            let sucsses = true;
             while sucsses == true { //waits till pawn prommotion sucseful before moving on
             let mut select = String::new();
             io::stdin().read_line(&mut select).unwrap(); //takes an input
             select = select.trim().to_string();
             if select.len() == 1{
                 match select.as_ref(){ //swaps peice
-                    "n" => self.tile[intial.x as usize][intial.y as usize].peice = 'N',
-                    "r" => self.tile[intial.x as usize][intial.y as usize].peice = 'R',
-                    "b" => self.tile[intial.x as usize][intial.y as usize].peice = 'B',
-                    "q" => self.tile[intial.x as usize][intial.y as usize].peice = 'Q',
+                    "n" | "N" => self.tile[intial.x as usize][intial.y as usize].peice = 'N',
+                    "r" | "R" => self.tile[intial.x as usize][intial.y as usize].peice = 'R',
+                    "b" | "B" => self.tile[intial.x as usize][intial.y as usize].peice = 'B',
+                    "q" | "Q" => self.tile[intial.x as usize][intial.y as usize].peice = 'Q',
                     _ => println!("please select ether q r b q"),
                 }
             }
@@ -409,7 +410,7 @@ pub fn nextTake(board : &Board, debug : bool) -> [[Sphere;8];8]{
     return sphere;
 }
 
-pub fn CheckDetc(board : &Board, sphere : &[[Sphere;8];8]) -> Check{
+pub fn CheckDetc(board : &Board, sphere : &[[Sphere;8];8], isAi : bool) -> Check{
     let mut check = Check{white: false, black : false};
     let mut kingCount = 0;
     for j in 0..8{
@@ -417,10 +418,10 @@ pub fn CheckDetc(board : &Board, sphere : &[[Sphere;8];8]) -> Check{
             if board.tile[i][j].peice == 'K'{
                 kingCount += 1;
                 if board.tile[i][j].colour == 1 && sphere[i][j].whiteSphere > 0 {
-                    println!("black check");
+                    if isAi == false{println!("black check");}
                     check.black = true;
                 }else if board.tile[i][j].colour == 2 && sphere[i][j].blackSphere > 0 {
-                    println!("white check");
+                    if isAi == false{println!("white check");}
                     check.white = true;
                 }
             }
@@ -447,10 +448,15 @@ impl AiScoreTrack{
 
 
 pub fn AiCall(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool){
+    
+    
+    
     let mut scoreTrack = AiScoreTrack{reward : 0, risk : 0};
-    possibleMoves(&board, colour, colour, debug, 0, 2, 0); //for ai debth change 6 value
+    possibleMoves(&board, colour, colour, debug, 0, 6, 0); //for ai debth change 6 value
     println!("returned saftley");
     calcScore(board.clone(), colour, check, sphere, debug);
+
+    //handle.join().unwrap();
 }
 
 fn scores(peice : char) -> i16 {
@@ -531,11 +537,14 @@ pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8]
     
 }
 
-fn possibleMoves(board : &Board, player : u8,colour : u8, mut debug : bool, mut down : u8, depth : u8, mut scoreTrack : isize) -> isize{
-
+fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, mut down : u8, depth : u8, mut scoreTrack : isize) -> isize{
+    thread::spawn(move || {
+        
+    });
     if player == colour{
         //down += 1;
     }
+    scoreTrack = 0;
 
     let mut intial = Displace::new();
     let mut Final = Displace::new();
@@ -559,7 +568,7 @@ fn possibleMoves(board : &Board, player : u8,colour : u8, mut debug : bool, mut 
         for i in 0..8{
             if board.tile[i][j].colour == colour{
                 if board.tile[i][j].peice == 'p' {
-                if j != 7 && j != 0 && board.tile[i ][(j as isize + direc) as usize].colour == 0 {
+                if j != 7 && j != 0 && board.tile[i][(j as isize + direc) as usize].colour == 0 {
                     trial = board.clone();
                     intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as isize + direc) as u8;
                     trial = trial.Swap( &Final, &intial, true);
@@ -568,26 +577,59 @@ fn possibleMoves(board : &Board, player : u8,colour : u8, mut debug : bool, mut 
                         scoreTrack = direc * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, scoreTrack);
                         println!("end it {}", scoreTrack);
                         if scoreTrack > highest as isize{
-                            highest = scoreTrack;
+                            highest = scoreTrack * direc;
                             turn.x = i as u8; turn.y = ( j as isize + direc)as u8;
                             print!("score higest: {} {} {}", scoreTrack, turn.x, turn.y);
                         }
                     }else{
-                        scoreTrack += direc * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, scoreTrack);
-                        print!("score {}  ", scoreTrack);   
+                        scoreTrack += possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, scoreTrack);
                     }
                 }
-                if board.tile[i][j].moved == false && i < 6 && i > 1 && board.tile[i][(j as isize + 2* direc) as usize].colour == 0{
+                if board.tile[i][j].moved == false && board.tile[i][(j as isize + 2* direc) as usize].colour == 0{
                     trial = board.clone();
                     intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as isize + 2*direc) as u8;
                     trial = trial.Swap(&Final, &intial, true);
                     if down == 0{
                         scoreTrack =0;
-                        scoreTrack += direc * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, scoreTrack);
+                        scoreTrack = direc * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, scoreTrack);
                         println!("end it {}", scoreTrack);
                         if scoreTrack > highest as isize {
                             highest = scoreTrack;
                             turn.x = i as u8; turn.y =( j as isize + 2* direc)as u8;
+                            println!("score higest: {}", scoreTrack);
+                        }
+                    }else{
+                        scoreTrack += direc * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, scoreTrack);
+                    }
+                }
+                if j != 7 && j != 0 && i < 7 && board.tile[i+1][(j as isize + direc) as usize].colour == openent{
+                    trial = board.clone();
+                    intial.x = i as u8; intial.y = j as u8; Final.x = (i+1) as u8; Final.y = (j as isize + direc) as u8;
+                    trial = trial.Swap(&Final, &intial, true);
+                    if down == 0{
+                        scoreTrack =0;
+                        scoreTrack = direc * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, scoreTrack);
+                        println!("end it {}", scoreTrack);
+                        if scoreTrack > highest as isize {
+                            highest = scoreTrack;
+                            turn.x = Final.x as u8; turn.y = Final.y;
+                            println!("score higest: {}", scoreTrack);
+                        }
+                    }else{
+                        scoreTrack += direc * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, scoreTrack);
+                    }
+                }
+                if j != 7 && j != 0 && i > 0 && board.tile[i-1][(j as isize + direc) as usize].colour == openent{
+                    trial = board.clone();
+                    intial.x = i as u8; intial.y = j as u8; Final.x = (i-1) as u8; Final.y = (j as isize + direc) as u8;
+                    trial = trial.Swap(&Final, &intial, true);
+                    if down == 0{
+                        scoreTrack =0;
+                        scoreTrack = direc * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, scoreTrack);
+                        println!("end it {}", scoreTrack);
+                        if scoreTrack > highest as isize {
+                            highest = scoreTrack;
+                            turn.x = Final.x as u8; turn.y = Final.y;
                             println!("score higest: {}", scoreTrack);
                         }
                     }else{
@@ -600,16 +642,15 @@ fn possibleMoves(board : &Board, player : u8,colour : u8, mut debug : bool, mut 
     }
 
     let sphere = nextTake(&board, false);
-    let check = CheckDetc(&board, &sphere);
+    let check = CheckDetc(&board, &sphere, true);
 
     aiScoreTrack = calcScore(board.clone(), colour, check, sphere, debug);
 
     scoreTrack += aiScoreTrack.reward - aiScoreTrack.risk;
 
-    print!("aiScore {} {}, score {}", aiScoreTrack.reward, aiScoreTrack.risk, scoreTrack);
-
     if down == 0{
-        print!("move req {}{}", turn.x, turn.y);
+        scoreTrack = scoreTrack * direc;
+        print!("move req {}{} ", (turn.x + 97) as char, (turn.y + 49) as char);
     }
 
     return scoreTrack;
