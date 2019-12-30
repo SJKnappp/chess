@@ -415,7 +415,6 @@ fn main() {
             }else {
                 history = format!("{}{}{}{}{}", end.moveStr[0], end.moveStr[1], end.moveStr[2], end.moveStr[3], end.moveStr[4]);
                 print!("{}{}{}{}{}", end.moveStr[0], end.moveStr[1], end.moveStr[2], end.moveStr[3], end.moveStr[4]);
-                println!("test {} history [ ln 560]", history);
                 oldstate = board.clone(); //updates old state
                 board.History.push(turn); //creates a history in PGN notation
             }

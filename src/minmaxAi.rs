@@ -232,7 +232,7 @@ impl Board {
             if self.tile[intial.x as usize][intial.y as usize].peice != 'p' { break; } //if peices changed break out of loop
             }
         }
-        }
+        }else {self.tile[intial.x as usize][intial.y as usize].peice = 'Q';}
 
         self.tile[Final.x as usize][Final.y as usize].peice = self.tile[intial.x as usize][intial.y as usize].peice; //moves peice
         self.tile[Final.x as usize][Final.y as usize].colour = self.tile[intial.x as usize][intial.y as usize].colour;
@@ -460,9 +460,6 @@ impl AiScoreTrack{
 
 pub fn AiCall(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool) -> Displace{
     
-    
-    
-    let mut scoreTrackr = Ai_return::new();
     let ai_return = possibleMoves(&board, colour, colour, debug, 0, 5, 1); //for ai debth change 6 value
     println!("returned saftley");
     calcScore(board.clone(), colour, check, sphere, debug);
@@ -473,11 +470,11 @@ pub fn AiCall(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8]
 
 fn scores(peice : char) -> i16 {
     match peice{
-        'p' => return 1,
-        'R' => return 50,
+        'p' => return 2,
+        'R' => return 100,
         'N' => return 25,
-        'B' => return 30,
-        'Q' => return 100,
+        'B' => return 40,
+        'Q' => return 200,
         'K' => return 255,
         _ => return 0,
     }
@@ -557,9 +554,9 @@ pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8]
 }
 
 fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, down : u8, depth : u8, mut swap : isize) -> Ai_return{
-    thread::spawn(move || {
+    //thread::spawn(move || {
         
-    });
+    //});
     if player == colour{
         //down += 1;
     }
@@ -589,7 +586,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
         for i in 0..8{
             if board.tile[i][j].colour == colour{
                 if board.tile[i][j].peice == 'p' {
-                    if j != 7 && j != 0 && board.tile[i][(j as isize + direc) as usize].colour == 0 {
+                    if j != 7 && j != 0 && board.tile[i][(j as isize + direc) as usize].colour == 0 && board.tile[i][(j as isize + direc) as usize].peice != 'K' {
                         trial = board.clone();
                         intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as isize + direc) as u8;
                         trial = trial.Swap( &Final, &intial, true);
@@ -605,7 +602,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                         }
                     }
-                    if board.tile[i][j].moved == false && board.tile[i][(j as isize + 2* direc) as usize].colour == 0{
+                    if board.tile[i][j].moved == false && board.tile[i][(j as isize + 2* direc) as usize].colour == 0 && board.tile[i][(j as isize + 2* direc) as usize].peice != 'K'{
                         trial = board.clone();
                         intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as isize + 2*direc) as u8;
                         trial = trial.Swap(&Final, &intial, true);
@@ -621,7 +618,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                         }
                     }
-                    if j != 7 && j != 0 && i < 7 && board.tile[i+1][(j as isize + direc) as usize].colour == openent{
+                    if j != 7 && j != 0 && i < 7 && board.tile[i+1][(j as isize + direc) as usize].colour == openent && board.tile[i+1][(j as isize + direc) as usize].peice != 'K'{
                         trial = board.clone();
                         intial.x = i as u8; intial.y = j as u8; Final.x = (i+1) as u8; Final.y = (j as isize + direc) as u8;
                         trial = trial.Swap(&Final, &intial, true);
@@ -637,7 +634,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                         }
                     }
-                    if j != 7 && j != 0 && i > 0 && board.tile[i-1][(j as isize + direc) as usize].colour == openent{
+                    if j != 7 && j != 0 && i > 0 && board.tile[i-1][(j as isize + direc) as usize].colour == openent && board.tile[i-1][(j as isize + direc) as usize].peice != 'K'{
                         trial = board.clone();
                         intial.x = i as u8; intial.y = j as u8; Final.x = (i-1) as u8; Final.y = (j as isize + direc) as u8;
                         trial = trial.Swap(&Final, &intial, true);
@@ -655,8 +652,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                     }
                     if Ai_return.result < -1000 && down != 0{return Ai_return;}
                 }
-                else if board.tile[i][j].peice == 'R' && board.tile[i][j].peice == 'Q' && board.tile[i][j].peice == 'B' {
-                    
+                else if board.tile[i][j].peice == 'R' || board.tile[i][j].peice == 'Q' || board.tile[i][j].peice == 'B' {
                     let mut Up = false;let mut Do =false;let mut Le =false;let mut Ri=false;let mut NE=false;let mut SE=false;let mut SW=false;let mut NW=false;
                     
                     if board.tile[i][j].peice == 'R' {Up = true; Do = true; Le = true; Ri = true;}
@@ -664,10 +660,9 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                     if board.tile[i][j].peice == 'Q' {Up = true; Do = true; Le = true; Ri = true;NE = true; NW = true; SE =true; SW =true;}
 
                     for dis in 1..8{
-                        if Up == true && j +dis < 8{
-
+                        if Up == true && j + dis < 8{
                             let x = i; let y = j  + dis;
-                            if board.tile[x][y].colour != colour{
+                            if board.tile[x][y].colour != colour && board.tile[x][y].peice != 'K'{
                                 trial = board.clone();
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
@@ -688,7 +683,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
             
                         if Do == true && j as i8 -dis as i8 >= 0{
                             let x = i ; let y = j - dis;
-                            if board.tile[x][y].colour != colour{
+                            if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 trial = board.clone();
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
@@ -709,7 +704,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         if Le == true && i as i8 - dis as i8 >= 0{
                             
                             let x = i - dis; let y = j;
-                            if board.tile[x][y].colour != colour{
+                            if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 trial = board.clone();
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
@@ -729,7 +724,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
             
                         if Ri == true && j + dis < 8 {
                             let x = i; let y = j  + dis;
-                            if board.tile[x][y].colour != colour{
+                            if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 trial = board.clone();
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
@@ -747,10 +742,10 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             }
                         }else {Ri = false }
             
-                        if NE == true && i +dis < 8 && j + i < 8 && board.tile[(i + dis) as usize][(j + i) as usize].colour == 0{
+                        if NE == true && i +dis < 8 && j + dis < 8 && board.tile[(i + dis) as usize][(j + dis) as usize].colour == 0{
                          
                             let x = i + dis; let y = j + dis;
-                            if board.tile[x][y].colour != colour{
+                            if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 trial = board.clone();
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
@@ -771,7 +766,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         if SE == true && i +dis < 8 && j as i8 - dis as i8 >= 0 && board.tile[(i + dis) as usize][(j - dis) as usize].colour == 0{
                          
                             let x = i + dis; let y = j - dis;
-                            if board.tile[x][y].colour != colour{
+                            if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 trial = board.clone();
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
@@ -789,10 +784,10 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             }
                         }else {SE = false }
             
-                        if SW == true && i as i8 - dis as i8 >= 0 && j as i8 - dis as i8 >= 0 && board.tile[(i - i) as usize][(j - i) as usize].colour == 0{
+                        if SW == true && i as i8 - dis as i8 >= 0 && j as i8 - dis as i8 >= 0 && board.tile[(i - dis) as usize][(j - dis) as usize].colour == 0{
                           
                             let x = i - dis; let y = j - dis;
-                            if board.tile[x][y].colour != colour{
+                            if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 trial = board.clone();
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
@@ -813,7 +808,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         if NW == true && i as i8 - dis as i8 >= 0 && j +dis < 8 && board.tile[(i - dis) as usize][(j +dis) as usize].colour == 0{
                           
                             let x = i - dis; let y = j + dis;
-                            if board.tile[x][y].colour != colour{
+                            if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 trial = board.clone();
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
@@ -830,13 +825,13 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 }
                             }
                         }else {NW = false }
-            
+                        if Ai_return.result < -1000 && down != 0{return Ai_return;}
             
                 }
                 }else if board.tile[i][j].peice == 'N' {
                     if i < 6 && j < 7 {
                         let x = i + 2; let y = j + 1;
-                        if board.tile[x][y].colour != colour{
+                        if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                             trial = board.clone();
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
@@ -854,7 +849,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         }
                     }if i < 6 && j > 0 {
                         let x = i + 2; let y = j - 1;
-                        if board.tile[x][y].colour != colour{
+                        if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                             trial = board.clone();
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
@@ -872,7 +867,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         }
                     }if i < 7 && j < 6 {
                         let x = i + 1; let y = j + 2;
-                        if board.tile[x][y].colour != colour{
+                        if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                             trial = board.clone();
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
@@ -890,7 +885,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         }
                     }if i < 7 && j > 1 {
                         let x = i + 1; let y = j - 2;
-                        if board.tile[x][y].colour != colour{
+                        if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                             trial = board.clone();
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
@@ -908,7 +903,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         }
                     }if i > 0 && j < 6 {
                         let x = i - 1; let y = j + 2;
-                        if board.tile[x][y].colour != colour{
+                        if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                             trial = board.clone();
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
@@ -926,7 +921,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         }
                     }if i > 0 && j > 1 {
                         let x = i - 1; let y = j - 2;
-                        if board.tile[x][y].colour != colour{
+                        if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                             trial = board.clone();
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
@@ -944,7 +939,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         }
                     }if i > 1 && j < 7 {
                         let x = i - 2; let y = j + 1;
-                        if board.tile[x][y].colour != colour{
+                        if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                             trial = board.clone();
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
@@ -962,7 +957,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         }
                     }if i > 1 && j > 0 {
                         let x = i - 2; let y = j - 1;
-                        if board.tile[x][y].colour != colour{
+                        if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                             trial = board.clone();
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
@@ -1009,10 +1004,6 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
 
     return Ai_return;
     
-}
-
-fn BoardScore(){
-
 }
 
 fn main() {}
