@@ -373,14 +373,14 @@ pub fn nextTake(board : &Board, debug : bool) -> [[Sphere;8];8]{
             else if board.tile[i][j].peice == 'K'{
                 if board.tile[i][j].colour == 1 {
                     if i > 0 {sphere[i-1][j].blackSphere += 1;}
-                    if j < 7 {sphere[i+1][j].blackSphere += 1;}
+                    if i < 7 {sphere[i+1][j].blackSphere += 1;}
                     if i > 0 && j > 0 {sphere[i-1][j-1].blackSphere += 1;}
                     if i > 0 && j < 7 {sphere[i-1][j+1].blackSphere += 1;}
                     if i < 7 && j > 0 {sphere[i+1][j-1].blackSphere += 1;}
                     if i < 7 && j < 7 {sphere[i+1][j+1].blackSphere += 1;}
                     if j > 0 {sphere[i][j-1].blackSphere += 1;}
                     if j < 7 {sphere[i][j+1].blackSphere += 1;}
-                }else if board.tile[i][j].colour == 1 {
+                }else if board.tile[i][j].colour == 2 {
                     if i > 0 {sphere[i-1][j].whiteSphere += 1;}
                     if j < 7 {sphere[i+1][j].whiteSphere += 1;}
                     if i > 0 && j > 0 {sphere[i-1][j-1].whiteSphere += 1;}
