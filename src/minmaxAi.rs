@@ -195,6 +195,7 @@ impl Board {
     //takes start and end point and kills and moves the peices
     pub fn Swap(mut self, Final : &Displace, intial : &Displace, Ai : bool) -> Board{
 
+
         if self.tile[Final.x as usize][Final.y as usize].colour == 1{ //adds taken peices to taken history
                 self.takenWhite.push( self.tile[Final.x as usize][Final.y as usize].peice );
         } else if self.tile[Final.x as usize][Final.y as usize].colour == 2{
@@ -457,15 +458,16 @@ impl AiScoreTrack{
 }
 
 
-pub fn AiCall(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool){
+pub fn AiCall(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool) -> Displace{
     
     
     
-    let mut scoreTrackr = AiScoreTrack::new();
-    possibleMoves(&board, colour, colour, debug, 0, 5, 1); //for ai debth change 6 value
+    let mut scoreTrackr = Ai_return::new();
+    let ai_return = possibleMoves(&board, colour, colour, debug, 0, 5, 1); //for ai debth change 6 value
     println!("returned saftley");
     calcScore(board.clone(), colour, check, sphere, debug);
 
+    return ai_return.play;
     //handle.join().unwrap();
 }
 

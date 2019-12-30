@@ -304,6 +304,7 @@ fn main() {
     let mut history =  String::new();
     let mut colour = 1;
     let mut debug = false;
+    let mut Ai_Play = false;
 
     let mut sphere = minmaxAi::nextTake(&board, debug);
 
@@ -316,23 +317,33 @@ fn main() {
 
             check = minmaxAi::CheckDetc(&board, &sphere, false);
 
-            print!("player: {} please make your move:  \n", if board.player == true { "white" }else {"black"}); //player turn
             if board.player == false {colour = 1;} else {colour = 2;}
 
             if (board.playerAi.BlackAi == true && colour == 1) || (board.playerAi.WhiteAi  == true && colour == 2){
-                minmaxAi::AiCall(board.clone(), colour, check, sphere, debug); //Ai test function
+                println!("{}, ", colour);
+                turn = minmaxAi::AiCall(board.clone(), colour, check, sphere, debug); //Ai test function
+                Ai_Play = true;
+                if debug == true {
+                println!("turn {}{}{}{}{}", turn.peice, turn.ambigX, turn.ambigY, turn.x, turn.y);
+                }
+            }else{Ai_Play = false;
+                print!("player: {} please make your move:  \n", if board.player == true { "white" }else {"black"}); //player turn
+                
             }
-        }else{println!("please reenter your move"); moveAccepted = true;} //reinput turn if not allowed
+        }else if Ai_Play == true{print!("ai failed breaking"); break;}
+        else{println!("please reenter your move"); moveAccepted = true;} //reinput turn if not allowed
         
+       
         let mut play = String::new();
+        if Ai_Play == false {
         io::stdin().read_line(&mut play).unwrap(); //input move
         play = play.trim().to_string();
-       
+        }
 
 
 
-
-        if play == "exit"{ break; }
+        if Ai_Play == true {}
+        else if play == "exit"{ break; }
         else if play == "debug" {debug = true; moveAccepted = false; println!("debug mode on"); turn.x =8; turn.y = 8;}
         else if play.len() == 2{ //checks if pawn as input 2 long
             turn.peice = 'p';
@@ -378,7 +389,12 @@ fn main() {
             moveAccepted = false;
         }
 
-        if moveAccepted == true { //runs peices check
+        if Ai_Play == true{
+            end.x = turn.ambigX;
+            end.y = turn.ambigY;
+        }
+
+        if moveAccepted == true && Ai_Play == false { //runs peices check
             end = checkallowed(&board, &turn);
             if end.peice == 'f' {moveAccepted = false; println!("move not allowed");}
         }
