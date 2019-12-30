@@ -519,8 +519,10 @@ pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8]
                 scoreTrack.protected += (opSphere[i][j] * (scores(board.tile[i][j].peice) as i32)/2) as isize;
             }
             if board.tile[i][j].colour == openent && selfSphere[i][j] != 0 {
-                gain[i][j] += selfSphere[i][j] * scores(board.tile[i][j].peice) as i32;
+                gain[i][j] += selfSphere[i][j] * 2 * scores(board.tile[i][j].peice) as i32;
                 scoreTrack.reward += gain[i][j] as isize;
+            }if board.tile[i][j].colour == openent && opSphere[i][j] == 0 && selfSphere[i][j] != 0{
+                scoreTrack.reward += 100;
             }
 
             if debug == true{
@@ -585,7 +587,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             println!("end it {}", scoreTrack);
                             if scoreTrack > highest as isize{
                                 highest = scoreTrack;
-                                turn.x = i as u8; turn.y = ( j as isize + direc)as u8;
+                                turn.x = i as u8; turn.y = ( j as isize + direc)as u8; turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
                                 print!("score higest: {} {} {}", scoreTrack, turn.x, turn.y);
                             }
                         }else{
@@ -601,7 +603,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             println!("end it {}", scoreTrack);
                             if scoreTrack > highest as isize {
                                 highest = scoreTrack;
-                                turn.x = i as u8; turn.y =( j as isize + 2* direc)as u8;
+                                turn.x = i as u8; turn.y =( j as isize + 2* direc)as u8;turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
                                 println!("score higest: {}", scoreTrack);
                             }
                         }else{
@@ -617,7 +619,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             println!("end it {}", scoreTrack);
                             if scoreTrack > highest as isize {
                                 highest = scoreTrack;
-                                turn.x = Final.x as u8; turn.y = Final.y;
+                                turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
                                 println!("score higest: {}", scoreTrack);
                             }
                         }else{
@@ -633,15 +635,193 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             println!("end it {}", scoreTrack);
                             if scoreTrack > highest as isize {
                                 highest = scoreTrack;
-                                turn.x = Final.x as u8; turn.y = Final.y;
+                                turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
                                 println!("score higest: {}", scoreTrack);
                             }
                         }else{
                             scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
                         }
                     }
-                }else if board.tile[i][j].peice == 'R' {
+                    if scoreTrack < -1000 && down != 0{return scoreTrack;}
+                }
+                else if board.tile[i][j].peice == 'R' && board.tile[i][j].peice == 'Q' && board.tile[i][j].peice == 'B' {
+                    
+                    let mut Up = false;let mut Do =false;let mut Le =false;let mut Ri=false;let mut NE=false;let mut SE=false;let mut SW=false;let mut NW=false;
+                    
+                    if board.tile[i][j].peice == 'R' {Up = true; Do = true; Le = true; Ri = true;}
+                    if board.tile[i][j].peice == 'B' {NE = true; NW = true; SE =true; SW =true;}
+                    if board.tile[i][j].peice == 'Q' {Up = true; Do = true; Le = true; Ri = true;NE = true; NW = true; SE =true; SW =true;}
 
+                    for dis in 1..8{
+                        if Up == true && j +dis < 8{
+
+                            let x = i; let y = j  + dis;
+                            if board.tile[x][y].colour != colour{
+                                trial = board.clone();
+                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
+                                trial = trial.Swap(&Final, &intial, true);
+                                if down == 0{
+                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                    println!("end it {}", scoreTrack);
+                                    if scoreTrack > highest as isize {
+                                        highest = scoreTrack;
+                                        turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
+                                        println!("score higest: {}", scoreTrack);
+                                    }
+                                }else{
+                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                }
+                            }
+
+                        }else {Up = false }
+            
+                        if Do == true && j as i8 -dis as i8 >= 0{
+                            let x = i ; let y = j - dis;
+                            if board.tile[x][y].colour != colour{
+                                trial = board.clone();
+                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
+                                trial = trial.Swap(&Final, &intial, true);
+                                if down == 0{
+                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                    println!("end it {}", scoreTrack);
+                                    if scoreTrack > highest as isize {
+                                        highest = scoreTrack;
+                                        turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
+                                        println!("score higest: {}", scoreTrack);
+                                    }
+                                }else{
+                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                }
+                            }
+                        }else {Do = false }
+            
+                        if Le == true && i as i8 - dis as i8 >= 0{
+                            
+                            let x = i - dis; let y = j;
+                            if board.tile[x][y].colour != colour{
+                                trial = board.clone();
+                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
+                                trial = trial.Swap(&Final, &intial, true);
+                                if down == 0{
+                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                    println!("end it {}", scoreTrack);
+                                    if scoreTrack > highest as isize {
+                                        highest = scoreTrack;
+                                        turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
+                                        println!("score higest: {}", scoreTrack);
+                                    }
+                                }else{
+                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                }
+                            }
+                        }else {Le = false }
+            
+                        if Ri == true && j + dis < 8 {
+                            let x = i; let y = j  + dis;
+                            if board.tile[x][y].colour != colour{
+                                trial = board.clone();
+                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
+                                trial = trial.Swap(&Final, &intial, true);
+                                if down == 0{
+                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                    println!("end it {}", scoreTrack);
+                                    if scoreTrack > highest as isize {
+                                        highest = scoreTrack;
+                                        turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
+                                        println!("score higest: {}", scoreTrack);
+                                    }
+                                }else{
+                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                }
+                            }
+                        }else {Ri = false }
+            
+                        if NE == true && i +dis < 8 && j + i < 8 && board.tile[(i + dis) as usize][(j + i) as usize].colour == 0{
+                         
+                            let x = i + dis; let y = j + dis;
+                            if board.tile[x][y].colour != colour{
+                                trial = board.clone();
+                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
+                                trial = trial.Swap(&Final, &intial, true);
+                                if down == 0{
+                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                    println!("end it {}", scoreTrack);
+                                    if scoreTrack > highest as isize {
+                                        highest = scoreTrack;
+                                        turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
+                                        println!("score higest: {}", scoreTrack);
+                                    }
+                                }else{
+                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                }
+                            }
+                        }else {NE = false }
+            
+                        if SE == true && i +dis < 8 && j as i8 - dis as i8 >= 0 && board.tile[(i + dis) as usize][(j - dis) as usize].colour == 0{
+                         
+                            let x = i + dis; let y = j - dis;
+                            if board.tile[x][y].colour != colour{
+                                trial = board.clone();
+                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
+                                trial = trial.Swap(&Final, &intial, true);
+                                if down == 0{
+                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                    println!("end it {}", scoreTrack);
+                                    if scoreTrack > highest as isize {
+                                        highest = scoreTrack;
+                                        turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
+                                        println!("score higest: {}", scoreTrack);
+                                    }
+                                }else{
+                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                }
+                            }
+                        }else {SE = false }
+            
+                        if SW == true && i as i8 - dis as i8 >= 0 && j as i8 - dis as i8 >= 0 && board.tile[(i - i) as usize][(j - i) as usize].colour == 0{
+                          
+                            let x = i - dis; let y = j - dis;
+                            if board.tile[x][y].colour != colour{
+                                trial = board.clone();
+                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
+                                trial = trial.Swap(&Final, &intial, true);
+                                if down == 0{
+                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                    println!("end it {}", scoreTrack);
+                                    if scoreTrack > highest as isize {
+                                        highest = scoreTrack;
+                                        turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
+                                        println!("score higest: {}", scoreTrack);
+                                    }
+                                }else{
+                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                }
+                            }
+                        }else {SW = false }
+            
+                        if NW == true && i as i8 - dis as i8 >= 0 && j +dis < 8 && board.tile[(i - dis) as usize][(j +dis) as usize].colour == 0{
+                          
+                            let x = i - dis; let y = j + dis;
+                            if board.tile[x][y].colour != colour{
+                                trial = board.clone();
+                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
+                                trial = trial.Swap(&Final, &intial, true);
+                                if down == 0{
+                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                    println!("end it {}", scoreTrack);
+                                    if scoreTrack > highest as isize {
+                                        highest = scoreTrack;
+                                        turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
+                                        println!("score higest: {}", scoreTrack);
+                                    }
+                                }else{
+                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                }
+                            }
+                        }else {NW = false }
+            
+            
+                }
                 }else if board.tile[i][j].peice == 'N' {
                     if i < 6 && j < 7 {
                         let x = i + 2; let y = j + 1;
@@ -654,7 +834,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 println!("end it {}", scoreTrack);
                                 if scoreTrack > highest as isize {
                                     highest = scoreTrack;
-                                    turn.x = Final.x as u8; turn.y = Final.y;
+                                    turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
                                     println!("score higest: {}", scoreTrack);
                                 }
                             }else{
@@ -672,7 +852,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 println!("end it {}", scoreTrack);
                                 if scoreTrack > highest as isize {
                                     highest = scoreTrack;
-                                    turn.x = Final.x as u8; turn.y = Final.y;
+                                    turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
                                     println!("score higest: {}", scoreTrack);
                                 }
                             }else{
@@ -690,7 +870,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 println!("end it {}", scoreTrack);
                                 if scoreTrack > highest as isize {
                                     highest = scoreTrack;
-                                    turn.x = Final.x as u8; turn.y = Final.y;
+                                    turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
                                     println!("score higest: {}", scoreTrack);
                                 }
                             }else{
@@ -708,7 +888,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 println!("end it {}", scoreTrack);
                                 if scoreTrack > highest as isize {
                                     highest = scoreTrack;
-                                    turn.x = Final.x as u8; turn.y = Final.y;
+                                    turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
                                     println!("score higest: {}", scoreTrack);
                                 }
                             }else{
@@ -726,7 +906,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 println!("end it {}", scoreTrack);
                                 if scoreTrack > highest as isize {
                                     highest = scoreTrack;
-                                    turn.x = Final.x as u8; turn.y = Final.y;
+                                    turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
                                     println!("score higest: {}", scoreTrack);
                                 }
                             }else{
@@ -744,7 +924,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 println!("end it {}", scoreTrack);
                                 if scoreTrack > highest as isize {
                                     highest = scoreTrack;
-                                    turn.x = Final.x as u8; turn.y = Final.y;
+                                    turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
                                     println!("score higest: {}", scoreTrack);
                                 }
                             }else{
@@ -762,7 +942,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 println!("end it {}", scoreTrack);
                                 if scoreTrack > highest as isize {
                                     highest = scoreTrack;
-                                    turn.x = Final.x as u8; turn.y = Final.y;
+                                    turn.x = Final.x as u8; turn.y = Final.y;  turn.peice = 'N'; turn.ambigX = intial.x; turn.ambigY = intial.y;
                                     println!("score higest: {}", scoreTrack);
                                 }
                             }else{
@@ -780,7 +960,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 println!("end it {}", scoreTrack);
                                 if scoreTrack > highest as isize {
                                     highest = scoreTrack;
-                                    turn.x = Final.x as u8; turn.y = Final.y;
+                                    turn.x = Final.x as u8; turn.y = Final.y;  turn.peice = 'N'; turn.ambigX = intial.x; turn.ambigY = intial.y;
                                     println!("score higest: {}", scoreTrack);
                                 }
                             }else{
@@ -788,6 +968,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             }
                         }
                     }
+                    if scoreTrack < -1000 && down != 0{return scoreTrack;}
                 }else if board.tile[i][j].peice == 'K' {
                     kingPos.x = i as u8;
                     kingPos.y = j as u8; 
@@ -816,7 +997,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
 
     if down == 0{
         scoreTrack = scoreTrack * direc;
-        print!("move req {}{} ", (turn.x + 97) as char, (turn.y + 49) as char);
+        print!("move req {}{}{}{}{} ",turn.peice, (turn.ambigX + 97) as char, (turn.ambigY + 49) as char,(turn.x + 97) as char, (turn.y + 49) as char);
     }
 
     return scoreTrack;
