@@ -212,28 +212,31 @@ impl Board {
             }
         }
 
-        if Ai == false{ //check not ai function
-            print!("{}, ", Ai);
+        
         if (Final.y == 7 || Final.y == 0 )&& Final.peice =='p'{ //premottes pawn
+            if Ai == false{ //check not ai function
+                        print!("{}, ", Ai);
+                        
+
             println!("pawn premotted please select replacement");
             let sucsses = true;
             while sucsses == true { //waits till pawn prommotion sucseful before moving on
-            let mut select = String::new();
-            io::stdin().read_line(&mut select).unwrap(); //takes an input
-            select = select.trim().to_string();
-            if select.len() == 1{
-                match select.as_ref(){ //swaps peice
-                    "n" | "N" => self.tile[intial.x as usize][intial.y as usize].peice = 'N',
-                    "r" | "R" => self.tile[intial.x as usize][intial.y as usize].peice = 'R',
-                    "b" | "B" => self.tile[intial.x as usize][intial.y as usize].peice = 'B',
-                    "q" | "Q" => self.tile[intial.x as usize][intial.y as usize].peice = 'Q',
-                    _ => println!("please select ether q r b q"),
+                let mut select = String::new();
+                io::stdin().read_line(&mut select).unwrap(); //takes an input
+                select = select.trim().to_string();
+                if select.len() == 1{
+                    match select.as_ref(){ //swaps peice
+                        "n" | "N" => self.tile[intial.x as usize][intial.y as usize].peice = 'N',
+                        "r" | "R" => self.tile[intial.x as usize][intial.y as usize].peice = 'R',
+                        "b" | "B" => self.tile[intial.x as usize][intial.y as usize].peice = 'B',
+                        "q" | "Q" => self.tile[intial.x as usize][intial.y as usize].peice = 'Q',
+                        _ => println!("please select ether q r b q"),
+                    }
                 }
+                if self.tile[intial.x as usize][intial.y as usize].peice != 'p' { break; } //if peices changed break out of loop
             }
-            if self.tile[intial.x as usize][intial.y as usize].peice != 'p' { break; } //if peices changed break out of loop
-            }
+            }else {self.tile[intial.x as usize][intial.y as usize].peice = 'Q';}
         }
-        }else {self.tile[intial.x as usize][intial.y as usize].peice = 'Q';}
 
         if self.tile[Final.x as usize][Final.y as usize].peice == 'K' {println!("attempt to remove king from {}{}", intial.x, intial.y);}
 
@@ -953,9 +956,8 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                 }else if board.tile[i][j].peice == 'K' {
                     kingPos.x = i as u8;
                     kingPos.y = j as u8; 
-                    /*
-                    if i < 7 {
-                          
+                    
+                    if i < 7 { 
                         let x = i + 1; let y = j;
                         if board.tile[x][y].colour != colour && board.tile[x][y].peice != 'K'{
                             trial = board.clone();
@@ -1080,6 +1082,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             }
                         }
                     }
+                    
                     if i < 7 && j > 0  {
                           
                         let x = i + 1; let y = j -1;
@@ -1098,8 +1101,8 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             }
                         }
                     }
-                    */
-                    if Ai_return.result < -1000 && down != 0{return Ai_return;}
+                    
+                    if Ai_return.result < -50 && down != 0{return Ai_return;}
 
                 }
             }

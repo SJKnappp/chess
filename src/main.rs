@@ -305,6 +305,7 @@ fn main() {
     let mut colour = 1;
     let mut debug = false;
     let mut Ai_Play = false;
+    let mut turnCount = -1;
 
     let mut sphere = minmaxAi::nextTake(&board, debug);
 
@@ -312,6 +313,10 @@ fn main() {
 
     while running { //main loop
         if moveAccepted == true{
+            print!("turn: {}", turnCount);
+            if turnCount == 50{print!("reaached temperay turn limit");break;}
+
+
             if board.player == true{board.player = false; }else{board.player = true;} //player
             board.print();
 
@@ -322,6 +327,9 @@ fn main() {
             if (board.playerAi.BlackAi == true && colour == 1) || (board.playerAi.WhiteAi  == true && colour == 2){
                 println!("{}, ", colour);
                 turn = minmaxAi::AiCall(board.clone(), colour, check, sphere, debug); //Ai test function
+                if colour == 2{
+                    turnCount += 1;
+                }
                 Ai_Play = true;
                 if debug == true {
                 println!("turn {}{}{}{}{}", turn.peice, turn.ambigX, turn.ambigY, turn.x, turn.y);
