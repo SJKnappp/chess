@@ -448,7 +448,7 @@ impl AiScoreTrack{
 
 pub fn AiCall(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool){
     let mut scoreTrack = AiScoreTrack{reward : 0, risk : 0};
-    possibleMoves(&board, colour, colour, debug, 0, 1, 0);
+    possibleMoves(&board, colour, colour, debug, 0, 4, 0);
     println!("returned saftley");
     calcScore(board.clone(), colour, check, sphere, debug);
 }
@@ -494,8 +494,6 @@ pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8]
         }
     }
 
-    println!("calc scores");
-
     if debug == true{
         println!("player colour: {} ", colour);
     }
@@ -535,19 +533,18 @@ pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8]
 
 fn possibleMoves(board : &Board, player : u8,colour : u8, mut debug : bool, mut down : u8, depth : u8, mut scoreTrack : isize) -> isize{
 
-    println!("test");
-
     if player == colour{
         down += 1;
     }
-
-   
 
     let mut intial = Displace::new();
     let mut Final = Displace::new();
     let mut trial = board.clone();
     let mut aiScoreTrack : AiScoreTrack;
     let mut openent;
+    let mut turn = Displace::new();
+    turn.x = 1;
+    let mut highest = 0;
 
     let mut moveable = [[false; 8]; 8];
     let direc : i8;
@@ -563,27 +560,30 @@ fn possibleMoves(board : &Board, player : u8,colour : u8, mut debug : bool, mut 
             if board.tile[i][j].colour == colour{
                 if board.tile[i][j].peice == 'p' {
                 if j != 7 && j != 0 && board.tile[i ][(j as i8 + direc) as usize].colour == 0 {
-                    print!("test posible ln 557 {}{} down:{} ", i, j, down);
                     intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as i8 + direc) as u8;
                     trial = trial.Swap( &Final, &intial, true);
-                    if down == 0 {
-                        scoreTrack = possibleMoves(&trial.clone(), player, colour, debug, down, depth, scoreTrack);
+                    if down == 1 && colour == player {
+                        scoreTrack = direc as isize * possibleMoves(&trial.clone(), player, colour, debug, down, depth, scoreTrack);
+                        if scoreTrack > highest as isize{
+                            print!("test9 {}", scoreTrack);
+                            turn.x = i as u8; turn.y = ( j as i8 + direc)as u8
+                        }
                     }else{
-                    scoreTrack += possibleMoves(&trial.clone(), player, openent, debug, down, depth, scoreTrack);
+                    scoreTrack += direc as isize * possibleMoves(&trial.clone(), player, openent, debug, down, depth, scoreTrack);
                     }
-
-                    println!("\n test1 {} depth {} ", scoreTrack, down);
                 }
                 if board.tile[i][j].moved == false && i != 7 && i != 0 && board.tile[i][(j as i8 + direc) as usize].colour == 0{
-                    print!("test posible ln 564 {}{} down:{}   ", i, j, down);
                     intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as i8 + direc) as u8;
                     trial = trial.Swap(&Final, &intial, true);
-                    if down == 0{
-                        scoreTrack += possibleMoves(&trial.clone(), player, openent, debug, down, depth, scoreTrack);
+                    if down == 1 && colour == player{
+                        scoreTrack += direc as isize * possibleMoves(&trial.clone(), player, openent, debug, down, depth, scoreTrack);
+                        if scoreTrack > highest as isize {
+                            print!("test10 {}", scoreTrack);
+                            turn.x = i as u8; turn.y =( j as i8 + direc)as u8
+                        }
                     }else{
-                        scoreTrack += possibleMoves(&trial.clone(), player, openent, debug, down, depth, scoreTrack);
+                        scoreTrack += direc as isize * possibleMoves(&trial.clone(), player, openent, debug, down, depth, scoreTrack);
                     }
-                    println!("\n test2 {} depth {} ", scoreTrack, down);
                 }
                 }
             }
@@ -593,17 +593,14 @@ fn possibleMoves(board : &Board, player : u8,colour : u8, mut debug : bool, mut 
     let sphere = nextTake(&board, false);
     let check = CheckDetc(&board, &sphere);
 
-
     aiScoreTrack = calcScore(board.clone(), colour, check, sphere, debug);
-    
-
-    println!(" {}  {}  ", aiScoreTrack.reward, aiScoreTrack.risk);
 
     scoreTrack += aiScoreTrack.reward - aiScoreTrack.risk;
 
-    print!("{}",scoreTrack );
+    if (down == 1 && colour == player){
+        print!("move req {}{}", turn.x, turn.y);
+    }
 
-    println!("test   ");
     return scoreTrack;
     
 }
