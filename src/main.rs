@@ -33,7 +33,7 @@ fn checkQMB(board : &minmaxAi::Board, mut startVec : Vec<minmaxAi::Displace>, en
 
             if checkR == true && endPos.x + i < 8 {
                 if board.tile[(endPos.x + i) as usize][endPos.y as usize].peice == ' ' {}
-                else if board.tile[(endPos.x+i) as usize][endPos.y as usize].peice == peice && board.tile[(endPos.x - i) as usize][endPos.y as usize].colour == player {
+                else if board.tile[(endPos.x+i) as usize][endPos.y as usize].peice == peice && board.tile[(endPos.x + i) as usize][endPos.y as usize].colour == player {
                      startPos.peice = 's'; startPos.x = (endPos.x + i) as u8; startPos.y = endPos.y;
                      startVec.push(startPos);
                 }else {checkR = false}
@@ -406,10 +406,10 @@ fn main() {
             check = minmaxAi::CheckDetc(&board, &sphere, false);
 
             //detects in player is in check
-            if board.player == true && check.white == true{
+            if board.player == true && check.white == true && Ai_Play == false{
                 print!("in check");
                 board = oldstate.clone(); //puts back into old state if they are
-            }else if board.player == true && check.black == true{
+            }else if board.player == false && check.black == true && Ai_Play == false{
                 print!("in check");
                 board = oldstate.clone();
             }else {
