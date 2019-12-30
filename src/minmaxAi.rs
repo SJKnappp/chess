@@ -27,7 +27,7 @@ pub struct Displace{
 
 impl Displace{
     pub fn new() -> Displace{
-        let mut displace = Displace { peice : ' ', x : 0, y : 0, ambigX : 0, ambigY : 0, moveStr : [' '; 5]};
+        let mut displace = Displace { peice : ' ', x : 8, y : 8, ambigX : 0, ambigY : 0, moveStr : [' '; 5]};
 
         return displace;
     }
@@ -433,7 +433,16 @@ pub fn CheckDetc(board : &Board, sphere : &[[Sphere;8];8], isAi : bool) -> Check
 
 
 
-
+struct Ai_return{
+    play : Displace,
+    result : isize,
+}
+impl Ai_return{
+    fn new() -> Ai_return{
+        let Ai = Ai_return{play : Displace::new(), result : 0};
+        return Ai;
+    }
+}
 
 pub struct AiScoreTrack {
     pub reward : isize,
@@ -452,7 +461,7 @@ pub fn AiCall(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8]
     
     
     
-    let mut scoreTrack = AiScoreTrack::new();
+    let mut scoreTrackr = AiScoreTrack::new();
     possibleMoves(&board, colour, colour, debug, 0, 5, 1); //for ai debth change 6 value
     println!("returned saftley");
     calcScore(board.clone(), colour, check, sphere, debug);
@@ -476,7 +485,7 @@ fn scores(peice : char) -> i16 {
 
 pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool) -> AiScoreTrack{
 
-    let mut scoreTrack = AiScoreTrack::new();
+    let mut scoreTrackr = AiScoreTrack::new();
 
     let openent : u8;
     if  colour == 1 {openent = 2;} else {openent = 1;}
@@ -513,16 +522,16 @@ pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8]
 
             if board.tile[i][j].colour == colour && opSphere[i][j] != 0 {
                 risk[i][j] += opSphere[i][j] * scores(board.tile[i][j].peice) as i32;
-                scoreTrack.risk += risk[i][j] as isize;
+                scoreTrackr.risk += risk[i][j] as isize;
             }
             if board.tile[i][j].colour == colour && selfSphere[i][j] != 0 {
-                scoreTrack.protected += (opSphere[i][j] * (scores(board.tile[i][j].peice) as i32)/2) as isize;
+                scoreTrackr.protected += (opSphere[i][j] * (scores(board.tile[i][j].peice) as i32)/2) as isize;
             }
             if board.tile[i][j].colour == openent && selfSphere[i][j] != 0 {
                 gain[i][j] += selfSphere[i][j] * 2 * scores(board.tile[i][j].peice) as i32;
-                scoreTrack.reward += gain[i][j] as isize;
+                scoreTrackr.reward += gain[i][j] as isize;
             }if board.tile[i][j].colour == openent && opSphere[i][j] == 0 && selfSphere[i][j] != 0{
-                scoreTrack.reward += 100;
+                scoreTrackr.reward += 100;
             }
 
             if debug == true{
@@ -541,18 +550,17 @@ pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8]
         }
     }
 
-    return scoreTrack;
+    return scoreTrackr;
     
 }
 
-fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, down : u8, depth : u8, mut swap : isize) -> isize{
+fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, down : u8, depth : u8, mut swap : isize) -> Ai_return{
     thread::spawn(move || {
         
     });
     if player == colour{
         //down += 1;
     }
-    let mut scoreTrack = 0;
 
     let mut intial = Displace::new();
     let mut Final = Displace::new();
@@ -561,6 +569,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
     let mut aiScoreTrack : AiScoreTrack;
     let mut openent;
     let mut turn = Displace::new();
+    let mut Ai_return = Ai_return::new();
     turn.x = 1;
     let mut highest = 0;
 
@@ -570,7 +579,7 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
     swap = swap * -1;
 
     if down == depth{
-        return scoreTrack;
+        return Ai_return;
     }
     
 
@@ -583,15 +592,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as isize + direc) as u8;
                         trial = trial.Swap( &Final, &intial, true);
                         if down == 0 {
-                            scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                            println!("end it {}", scoreTrack);
-                            if scoreTrack > highest as isize{
-                                highest = scoreTrack;
+                            Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                            println!("end it {}", Ai_return.result);
+                            if Ai_return.result > highest as isize{
+                                highest = Ai_return.result;
                                 turn.x = i as u8; turn.y = ( j as isize + direc)as u8; turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                print!("score higest: {} {} {}", scoreTrack, turn.x, turn.y);
+                                print!("score higest: {} {} {}", Ai_return.result, turn.x, turn.y);
                             }
                         }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                         }
                     }
                     if board.tile[i][j].moved == false && board.tile[i][(j as isize + 2* direc) as usize].colour == 0{
@@ -599,15 +608,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as isize + 2*direc) as u8;
                         trial = trial.Swap(&Final, &intial, true);
                         if down == 0{
-                            scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                            println!("end it {}", scoreTrack);
-                            if scoreTrack > highest as isize {
-                                highest = scoreTrack;
+                            Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                            println!("end it {}", Ai_return.result);
+                            if Ai_return.result > highest as isize {
+                                highest = Ai_return.result;
                                 turn.x = i as u8; turn.y =( j as isize + 2* direc)as u8;turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                println!("score higest: {}", scoreTrack);
+                                println!("score higest: {}", Ai_return.result);
                             }
                         }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                         }
                     }
                     if j != 7 && j != 0 && i < 7 && board.tile[i+1][(j as isize + direc) as usize].colour == openent{
@@ -615,15 +624,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         intial.x = i as u8; intial.y = j as u8; Final.x = (i+1) as u8; Final.y = (j as isize + direc) as u8;
                         trial = trial.Swap(&Final, &intial, true);
                         if down == 0{
-                            scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                            println!("end it {}", scoreTrack);
-                            if scoreTrack > highest as isize {
-                                highest = scoreTrack;
+                            Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                            println!("end it {}", Ai_return.result);
+                            if Ai_return.result > highest as isize {
+                                highest = Ai_return.result;
                                 turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                println!("score higest: {}", scoreTrack);
+                                println!("score higest: {}", Ai_return.result);
                             }
                         }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                         }
                     }
                     if j != 7 && j != 0 && i > 0 && board.tile[i-1][(j as isize + direc) as usize].colour == openent{
@@ -631,18 +640,18 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                         intial.x = i as u8; intial.y = j as u8; Final.x = (i-1) as u8; Final.y = (j as isize + direc) as u8;
                         trial = trial.Swap(&Final, &intial, true);
                         if down == 0{
-                            scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                            println!("end it {}", scoreTrack);
-                            if scoreTrack > highest as isize {
-                                highest = scoreTrack;
+                            Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                            println!("end it {}", Ai_return.result);
+                            if Ai_return.result > highest as isize {
+                                highest = Ai_return.result;
                                 turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                println!("score higest: {}", scoreTrack);
+                                println!("score higest: {}", Ai_return.result);
                             }
                         }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                         }
                     }
-                    if scoreTrack < -1000 && down != 0{return scoreTrack;}
+                    if Ai_return.result < -1000 && down != 0{return Ai_return;}
                 }
                 else if board.tile[i][j].peice == 'R' && board.tile[i][j].peice == 'Q' && board.tile[i][j].peice == 'B' {
                     
@@ -661,15 +670,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
                                 if down == 0{
-                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                    println!("end it {}", scoreTrack);
-                                    if scoreTrack > highest as isize {
-                                        highest = scoreTrack;
+                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                    println!("end it {}", Ai_return.result);
+                                    if Ai_return.result > highest as isize {
+                                        highest = Ai_return.result;
                                         turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                        println!("score higest: {}", scoreTrack);
+                                        println!("score higest: {}", Ai_return.result);
                                     }
                                 }else{
-                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                                 }
                             }
 
@@ -682,15 +691,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
                                 if down == 0{
-                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                    println!("end it {}", scoreTrack);
-                                    if scoreTrack > highest as isize {
-                                        highest = scoreTrack;
+                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                    println!("end it {}", Ai_return.result);
+                                    if Ai_return.result > highest as isize {
+                                        highest = Ai_return.result;
                                         turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                        println!("score higest: {}", scoreTrack);
+                                        println!("score higest: {}", Ai_return.result);
                                     }
                                 }else{
-                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                                 }
                             }
                         }else {Do = false }
@@ -703,15 +712,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
                                 if down == 0{
-                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                    println!("end it {}", scoreTrack);
-                                    if scoreTrack > highest as isize {
-                                        highest = scoreTrack;
+                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                    println!("end it {}", Ai_return.result);
+                                    if Ai_return.result > highest as isize {
+                                        highest = Ai_return.result;
                                         turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                        println!("score higest: {}", scoreTrack);
+                                        println!("score higest: {}", Ai_return.result);
                                     }
                                 }else{
-                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                                 }
                             }
                         }else {Le = false }
@@ -723,15 +732,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
                                 if down == 0{
-                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                    println!("end it {}", scoreTrack);
-                                    if scoreTrack > highest as isize {
-                                        highest = scoreTrack;
+                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                    println!("end it {}", Ai_return.result);
+                                    if Ai_return.result > highest as isize {
+                                        highest = Ai_return.result;
                                         turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                        println!("score higest: {}", scoreTrack);
+                                        println!("score higest: {}", Ai_return.result);
                                     }
                                 }else{
-                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                                 }
                             }
                         }else {Ri = false }
@@ -744,15 +753,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
                                 if down == 0{
-                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                    println!("end it {}", scoreTrack);
-                                    if scoreTrack > highest as isize {
-                                        highest = scoreTrack;
+                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                    println!("end it {}", Ai_return.result);
+                                    if Ai_return.result > highest as isize {
+                                        highest = Ai_return.result;
                                         turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                        println!("score higest: {}", scoreTrack);
+                                        println!("score higest: {}", Ai_return.result);
                                     }
                                 }else{
-                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                                 }
                             }
                         }else {NE = false }
@@ -765,15 +774,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
                                 if down == 0{
-                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                    println!("end it {}", scoreTrack);
-                                    if scoreTrack > highest as isize {
-                                        highest = scoreTrack;
+                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                    println!("end it {}", Ai_return.result);
+                                    if Ai_return.result > highest as isize {
+                                        highest = Ai_return.result;
                                         turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                        println!("score higest: {}", scoreTrack);
+                                        println!("score higest: {}", Ai_return.result);
                                     }
                                 }else{
-                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                                 }
                             }
                         }else {SE = false }
@@ -786,15 +795,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
                                 if down == 0{
-                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                    println!("end it {}", scoreTrack);
-                                    if scoreTrack > highest as isize {
-                                        highest = scoreTrack;
+                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                    println!("end it {}", Ai_return.result);
+                                    if Ai_return.result > highest as isize {
+                                        highest = Ai_return.result;
                                         turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                        println!("score higest: {}", scoreTrack);
+                                        println!("score higest: {}", Ai_return.result);
                                     }
                                 }else{
-                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                                 }
                             }
                         }else {SW = false }
@@ -807,15 +816,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                                 intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                                 trial = trial.Swap(&Final, &intial, true);
                                 if down == 0{
-                                    scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                    println!("end it {}", scoreTrack);
-                                    if scoreTrack > highest as isize {
-                                        highest = scoreTrack;
+                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                    println!("end it {}", Ai_return.result);
+                                    if Ai_return.result > highest as isize {
+                                        highest = Ai_return.result;
                                         turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                        println!("score higest: {}", scoreTrack);
+                                        println!("score higest: {}", Ai_return.result);
                                     }
                                 }else{
-                                scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                                 }
                             }
                         }else {NW = false }
@@ -830,15 +839,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
                             if down == 0{
-                                scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                println!("end it {}", scoreTrack);
-                                if scoreTrack > highest as isize {
-                                    highest = scoreTrack;
+                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                println!("end it {}", Ai_return.result);
+                                if Ai_return.result > highest as isize {
+                                    highest = Ai_return.result;
                                     turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                    println!("score higest: {}", scoreTrack);
+                                    println!("score higest: {}", Ai_return.result);
                                 }
                             }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                             }
                         }
                     }if i < 6 && j > 0 {
@@ -848,15 +857,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
                             if down == 0{
-                                scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                println!("end it {}", scoreTrack);
-                                if scoreTrack > highest as isize {
-                                    highest = scoreTrack;
+                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                println!("end it {}", Ai_return.result);
+                                if Ai_return.result > highest as isize {
+                                    highest = Ai_return.result;
                                     turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                    println!("score higest: {}", scoreTrack);
+                                    println!("score higest: {}", Ai_return.result);
                                 }
                             }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                             }
                         }
                     }if i < 7 && j < 6 {
@@ -866,15 +875,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
                             if down == 0{
-                                scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                println!("end it {}", scoreTrack);
-                                if scoreTrack > highest as isize {
-                                    highest = scoreTrack;
+                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                println!("end it {}", Ai_return.result);
+                                if Ai_return.result > highest as isize {
+                                    highest = Ai_return.result;
                                     turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                    println!("score higest: {}", scoreTrack);
+                                    println!("score higest: {}", Ai_return.result);
                                 }
                             }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                             }
                         }
                     }if i < 7 && j > 1 {
@@ -884,15 +893,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
                             if down == 0{
-                                scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                println!("end it {}", scoreTrack);
-                                if scoreTrack > highest as isize {
-                                    highest = scoreTrack;
+                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                println!("end it {}", Ai_return.result);
+                                if Ai_return.result > highest as isize {
+                                    highest = Ai_return.result;
                                     turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                    println!("score higest: {}", scoreTrack);
+                                    println!("score higest: {}", Ai_return.result);
                                 }
                             }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                             }
                         }
                     }if i > 0 && j < 6 {
@@ -902,15 +911,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
                             if down == 0{
-                                scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                println!("end it {}", scoreTrack);
-                                if scoreTrack > highest as isize {
-                                    highest = scoreTrack;
+                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                println!("end it {}", Ai_return.result);
+                                if Ai_return.result > highest as isize {
+                                    highest = Ai_return.result;
                                     turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                    println!("score higest: {}", scoreTrack);
+                                    println!("score higest: {}", Ai_return.result);
                                 }
                             }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                             }
                         }
                     }if i > 0 && j > 1 {
@@ -920,15 +929,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
                             if down == 0{
-                                scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                println!("end it {}", scoreTrack);
-                                if scoreTrack > highest as isize {
-                                    highest = scoreTrack;
+                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                println!("end it {}", Ai_return.result);
+                                if Ai_return.result > highest as isize {
+                                    highest = Ai_return.result;
                                     turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                    println!("score higest: {}", scoreTrack);
+                                    println!("score higest: {}", Ai_return.result);
                                 }
                             }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                             }
                         }
                     }if i > 1 && j < 7 {
@@ -938,15 +947,15 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
                             if down == 0{
-                                scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                println!("end it {}", scoreTrack);
-                                if scoreTrack > highest as isize {
-                                    highest = scoreTrack;
+                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                println!("end it {}", Ai_return.result);
+                                if Ai_return.result > highest as isize {
+                                    highest = Ai_return.result;
                                     turn.x = Final.x as u8; turn.y = Final.y;  turn.peice = 'N'; turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                    println!("score higest: {}", scoreTrack);
+                                    println!("score higest: {}", Ai_return.result);
                                 }
                             }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                             }
                         }
                     }if i > 1 && j > 0 {
@@ -956,19 +965,19 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
                             intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
                             trial = trial.Swap(&Final, &intial, true);
                             if down == 0{
-                                scoreTrack = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
-                                println!("end it {}", scoreTrack);
-                                if scoreTrack > highest as isize {
-                                    highest = scoreTrack;
+                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                println!("end it {}", Ai_return.result);
+                                if Ai_return.result > highest as isize {
+                                    highest = Ai_return.result;
                                     turn.x = Final.x as u8; turn.y = Final.y;  turn.peice = 'N'; turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                    println!("score higest: {}", scoreTrack);
+                                    println!("score higest: {}", Ai_return.result);
                                 }
                             }else{
-                            scoreTrack += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap);
+                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                             }
                         }
                     }
-                    if scoreTrack < -1000 && down != 0{return scoreTrack;}
+                    if Ai_return.result < -1000 && down != 0{return Ai_return;}
                 }else if board.tile[i][j].peice == 'K' {
                     kingPos.x = i as u8;
                     kingPos.y = j as u8; 
@@ -982,25 +991,21 @@ fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, dow
     let sphere = nextTake(&board, false);
     let check = CheckDetc(&board, &sphere, true);
 
-    if colour == 1  {
-        if player == 1 { if sphere[kingPos.x as usize][kingPos.y as usize].whiteSphere != 0 { return -1000;}}
-        else { if sphere[kingPos.x as usize][kingPos.y as usize].whiteSphere != 0 { return -1000;}}
-    }
-    else {
-        if player == 2 {if sphere[kingPos.x as usize][kingPos.y as usize].blackSphere != 0 { return -1000 }}
-        else { if sphere[kingPos.x as usize][kingPos.y as usize].blackSphere != 0{return -1000;}}
-    }
+    if colour == 1  {if sphere[kingPos.x as usize][kingPos.y as usize].whiteSphere != 0 { Ai_return.result = -1000; return Ai_return;}}
+    else { if sphere[kingPos.x as usize][kingPos.y as usize].blackSphere != 0 { Ai_return.result = -1000; return Ai_return; }}
+        
 
     aiScoreTrack = calcScore(board.clone(), colour, check, sphere, debug);
 
-    scoreTrack += aiScoreTrack.reward + aiScoreTrack.protected - aiScoreTrack.risk;
+    Ai_return.result += aiScoreTrack.reward + aiScoreTrack.protected - aiScoreTrack.risk;
 
     if down == 0{
-        scoreTrack = scoreTrack * direc;
+        Ai_return.result = Ai_return.result * direc;
         print!("move req {}{}{}{}{} ",turn.peice, (turn.ambigX + 97) as char, (turn.ambigY + 49) as char,(turn.x + 97) as char, (turn.y + 49) as char);
+        Ai_return.play = turn;
     }
 
-    return scoreTrack;
+    return Ai_return;
     
 }
 
