@@ -318,8 +318,10 @@ fn main() {
 
             print!("player: {} please make your move:  \n", if board.player == true { "white" }else {"black"}); //player turn
             if board.player == false {colour = 1;} else {colour = 2;}
-            minmaxAi::AiCall(board.clone(), colour, check, sphere, debug); //Ai test function
 
+            if (board.playerAi.BlackAi == true && colour == 1) || (board.playerAi.WhiteAi  == true && colour == 2){
+                minmaxAi::AiCall(board.clone(), colour, check, sphere, debug); //Ai test function
+            }
         }else{println!("please reenter your move"); moveAccepted = true;} //reinput turn if not allowed
         
         let mut play = String::new();
