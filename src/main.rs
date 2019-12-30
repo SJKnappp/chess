@@ -133,6 +133,8 @@ fn resolve_Ambig(startPos : &Vec<minmaxAi::Displace>, endPos : &minmaxAi::Displa
 
 fn checkallowed(board : &minmaxAi::Board, endPos : &minmaxAi::Displace) -> minmaxAi::Displace{
 
+    println!("test");
+
     let mut startPos = minmaxAi::Displace{peice : 'f', x  : 8, y : 8, ambigX : 8, ambigY : 8, moveStr : [' ';5]};
     let mut startVec : Vec<minmaxAi::Displace> = Vec::new();
     let player : u8;
@@ -141,39 +143,41 @@ fn checkallowed(board : &minmaxAi::Board, endPos : &minmaxAi::Displace) -> minma
     if board.player == false {player = 1; openent = 2;} else { player = 2; openent = 1;}
 
     if endPos.peice == 'p' {
-        if board.player == false{direc = 1;}else{direc = -1;} //direc looking backtowards start pos
 
+        println!("test3");
+        if board.player == false{direc = 1;}else{direc = -1;} //direc looking backtowards start pos
+        println!("test4");
         if board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.tile[endPos.x as usize][(endPos.y as i8 + direc)as usize].colour == player{
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + direc) as u8;
             startVec.push(startPos);
         } //move one foward
-
+        println!("test5");
         if board.tile[endPos.x as usize][(endPos.y as i8 + 2 * direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' '  &&
         board.tile[endPos.x as usize][(endPos.y as i8 + direc) as usize].peice == ' ' && board.tile[endPos.x as usize][(endPos.y as i8 + 2 *  direc)as usize].colour == player
         && ((endPos.y == 3 && player == 2) || (endPos.y == 4 && player == 1)){
             startPos.peice = 's'; startPos.x = endPos.x; startPos.y = (endPos.y as i8 + 2 *  direc) as u8;
             startVec.push(startPos);
         } //move two foward
-
+        println!("test6");
         if ( if endPos.x < 7 { board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].colour == openent && board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].colour == player} else {false == true}){
             startPos.peice = 's'; startPos.x = endPos.x + 1; startPos.y = (endPos.y as i8 + direc) as u8;
             startVec.push(startPos);
         } //takes left
-
+        println!("test7");
         if ( if endPos.x > 0 { board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].colour == openent && board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].colour == player} else {false == true}){
             startPos.peice = 's'; startPos.x = endPos.x - 1; startPos.y = (endPos.y as i8 + direc) as u8;
             startVec.push(startPos);
         } //take right
-
-        if ( if endPos.x < 7 { board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.History[board.History.len() - 1].peice == 'p'
+        println!("test8");
+        if ( if endPos.x < 7 && board.History.len() > 0 { board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' && board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.History[board.History.len() - 1].peice == 'p'
         && board.History[board.History.len() - 1].x == endPos.x && board.History[board.History.len() - 1].y == (endPos.y as i8 + direc) as u8  && board.tile[(endPos.x + 1) as usize][(endPos.y as i8 + direc)as usize].colour == player}
         else {false == true}){
 
             startPos.peice = 'S'; startPos.x = endPos.x + 1; startPos.y = (endPos.y as i8 + direc) as u8;
             startVec.push(startPos);
         } //en possion left
-
-        if ( if endPos.x > 0 { board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' &&
+        println!("test9");
+        if ( if endPos.x > 0 && board.History.len() > 0 { board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].peice == 'p' &&
         (board.tile[endPos.x as usize][endPos.y as usize].peice == ' ' && board.History[board.History.len() - 1].peice == 'p' && board.History[board.History.len() - 1].x == endPos.x && board.History[board.History.len() - 1].y ==( endPos.y as i8 + direc ) as u8 ) && board.tile[(endPos.x -1) as usize][(endPos.y as i8 + direc)as usize].colour == player} else {false == true}){
 
             startPos.peice = 'S'; startPos.x = endPos.x - 1; startPos.y = (endPos.y as i8 + direc) as u8;
@@ -256,6 +260,8 @@ fn checkallowed(board : &minmaxAi::Board, endPos : &minmaxAi::Displace) -> minma
     } // king does not detect ambuguate as only one king
     else {startPos.peice = 'f'}
 
+    println!("test2");
+
     startPos = resolve_Ambig(&startVec, &endPos);
 
     return startPos;
@@ -311,6 +317,8 @@ fn main() {
             check = minmaxAi::CheckDetc(&board, &sphere);
 
             print!("player: {} please make your move:  \n", if board.player == true { "white" }else {"black"}); //player turn
+            if board.player == false {colour = 1;} else {colour = 2;}
+            minmaxAi::AiCall(board.clone(), colour, check, sphere, debug); //Ai test function
 
         }else{println!("please reenter your move"); moveAccepted = true;} //reinput turn if not allowed
         
@@ -318,9 +326,9 @@ fn main() {
         io::stdin().read_line(&mut play).unwrap(); //input move
         play = play.trim().to_string();
        
-        if board.player == false {colour = 1;} else {colour = 2;}
 
-        minmaxAi::AiCall(board.clone(), colour, check, sphere, debug); //Ai test function
+
+
 
         if play == "exit"{ break; }
         else if play == "debug" {debug = true; moveAccepted = false; println!("debug mode on"); turn.x =8; turn.y = 8;}

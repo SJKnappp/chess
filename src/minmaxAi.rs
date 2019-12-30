@@ -563,9 +563,9 @@ fn possibleMoves(board : &Board, player : u8,colour : u8, mut debug : bool, mut 
                     intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as i8 + direc) as u8;
                     trial = trial.Swap( &Final, &intial, true);
                     if down == 1 && colour == player {
+                        scoreTrack =0;
                         scoreTrack = direc as isize * possibleMoves(&trial.clone(), player, colour, debug, down, depth, scoreTrack);
                         if scoreTrack > highest as isize{
-                            print!("test9 {}", scoreTrack);
                             turn.x = i as u8; turn.y = ( j as i8 + direc)as u8
                         }
                     }else{
@@ -576,9 +576,9 @@ fn possibleMoves(board : &Board, player : u8,colour : u8, mut debug : bool, mut 
                     intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as i8 + direc) as u8;
                     trial = trial.Swap(&Final, &intial, true);
                     if down == 1 && colour == player{
+                        scoreTrack =0;
                         scoreTrack += direc as isize * possibleMoves(&trial.clone(), player, openent, debug, down, depth, scoreTrack);
                         if scoreTrack > highest as isize {
-                            print!("test10 {}", scoreTrack);
                             turn.x = i as u8; turn.y =( j as i8 + direc)as u8
                         }
                     }else{
