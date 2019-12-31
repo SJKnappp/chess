@@ -482,12 +482,12 @@ pub fn AiCall(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8]
 
 fn scores(peice : char) -> i16 {
     match peice{
-        'p' => return 2,
-        'R' => return 100,
-        'N' => return 25,
+        'p' => return 20,
+        'R' => return 50,
+        'N' => return 30,
         'B' => return 40,
-        'Q' => return 200,
-        'K' => return 255,
+        'Q' => return 100,
+        'K' => return 500,
         _ => return 0,
     }
 }
@@ -516,7 +516,7 @@ fn turn_Score(board : &Board, sphere : &[[Sphere;8];8], turn : &Displace, colour
         }
     }
 
-    gain += scores(turn.peice) * 4 * selfSphere[turn.x as usize][turn.y as usize] as i16;
+    gain += scores(turn.peice) * selfSphere[turn.x as usize][turn.y as usize] as i16;
     if board.tile[turn.x as usize][turn.y as usize].colour == openent {gain += scores(board.tile[turn.x as usize][turn.y as usize].peice);}
     risk += scores(turn.peice) * opSphere[turn.x as usize][turn.y as usize] as i16;
     return (gain - risk) as isize;
@@ -593,6 +593,25 @@ pub fn calcScore(board : Board, colour : u8, check : Check, sphere : [[Sphere;8]
     
 }
 
+fn possibleSwaper(board : &Board, highest : isize, x : usize, y : usize, i : usize, j : usize,player : u8, colour : u8, openent :u8, debug : bool, down :u8, depth:u8, swap : isize, piece : char) -> Ai_return{
+    let mut trial = board.clone();
+    let mut persistent = board.clone();
+    let mut intial = Displace::new();
+    let mut Final = Displace::new();
+    intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
+    trial = trial.Swap(&Final, &intial, true);
+    let mut ai_return = Ai_return::new();
+    ai_return.play.peice = piece; ai_return.play.x = Final.x as u8; ai_return.play.y = Final.y;ai_return.play.ambigX = intial.x; ai_return.play.ambigY = intial.y;
+    
+    let sphere = nextTake(&persistent, false);
+    //let check = CheckDetc(&persistent, &sphere, true);
+    
+    ai_return.result = turn_Score(&trial, &sphere, &ai_return.play, colour, openent) + swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                                    
+    
+    return ai_return;
+}
+
 pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool, down : u8, depth : u8, mut swap : isize) -> Ai_return{
 
     let mut intial = Displace::new();
@@ -605,7 +624,8 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
     let mut tempPiece = ' ';
     let mut turn = Displace::new();
     let mut Ai_return = Ai_return::new();
-    let mut highest = -100;
+    let mut highest = -1000;
+    let mut Results = Ai_return::new();
 
     let mut moveable = [[false; 8]; 8];
     let direc : isize;
@@ -615,7 +635,6 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
     if down == depth{
         return Ai_return;
     }
-    
 
     for j in 0..8{
         for i in 0..8{
@@ -628,8 +647,9 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                         if down == 0 {
                             Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;   
                         }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                            Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                         }if Ai_return.result > highest as isize{
+                            
                             persistent = trial.clone();
                             highest = Ai_return.result;
                             turn.x = i as u8; turn.y = ( j as isize + direc)as u8; turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
@@ -657,7 +677,7 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                         if down == 0{
                             Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;   
                         }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                            Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                         }
                         if Ai_return.result > highest as isize {
                             persistent = trial.clone();
@@ -673,7 +693,7 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                             Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                             }
                         }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                            Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
                         }
                         if Ai_return.result > highest as isize {
                             persistent = trial.clone();
@@ -694,19 +714,8 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                             let x = i; let y = j  + dis;
                             if board.tile[x][y].colour != colour && board.tile[x][y].peice != 'K'{
                                 if board.tile[x][y].colour == openent{Up = false;}
-                                trial = board.clone();
-                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                                trial = trial.Swap(&Final, &intial, true);
-                                if down == 0{
-                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                    
-                                }else{
-                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                }if Ai_return.result > highest as isize {
-                                    persistent = trial.clone();
-                                    highest = Ai_return.result;
-                                    turn.peice = tempPiece; turn.x = Final.x as u8; turn.y = Final.y;turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                }
+                                Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                             }else {Up = false }
 
                         }else {Up = false }
@@ -715,19 +724,8 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                             let x = i ; let y = j - dis;
                             if board.tile[x][y].colour != colour && board.tile[x][y].peice != 'K'{
                                 if board.tile[x][y].colour == openent {Do = false;}
-                                trial = board.clone();
-                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                                trial = trial.Swap(&Final, &intial, true);
-                                if down == 0{
-                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                    
-                                }else{
-                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                }if Ai_return.result > highest as isize {
-                                    persistent = trial.clone();
-                                    highest = Ai_return.result;
-                                    turn.peice = tempPiece; turn.x = Final.x as u8; turn.y = Final.y;turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                }
+                                Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                             }else {Do = false }
                         }else {Do = false }
             
@@ -736,19 +734,8 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                             let x = i - dis; let y = j;
                             if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 if board.tile[x][y].colour == openent{Le = false;}
-                                trial = board.clone();
-                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                                trial = trial.Swap(&Final, &intial, true);
-                                if down == 0{
-                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                    
-                                }else{
-                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                }if Ai_return.result > highest as isize {
-                                    persistent = trial.clone();
-                                    highest = Ai_return.result;
-                                    turn.peice = tempPiece; turn.x = Final.x as u8; turn.y = Final.y;turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                }
+                                Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                             }else {Le = false }
                         }else {Le = false }
             
@@ -756,19 +743,8 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                             let x = i; let y = j  + dis;
                             if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 if board.tile[x][y].colour == openent{Ri = false;}
-                                trial = board.clone();
-                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                                trial = trial.Swap(&Final, &intial, true);
-                                if down == 0{
-                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                    
-                                }else{
-                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                }if Ai_return.result > highest as isize {
-                                    persistent = trial.clone();
-                                    highest = Ai_return.result;
-                                    turn.peice = tempPiece; turn.x = Final.x as u8; turn.y = Final.y;turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                }
+                                Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                             }else {Ri = false }
                         }else {Ri = false }
             
@@ -777,19 +753,8 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                             let x = i + dis; let y = j + dis;
                             if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 if board.tile[x][y].colour == openent{NE = false;}
-                                trial = board.clone();
-                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                                trial = trial.Swap(&Final, &intial, true);
-                                if down == 0{
-                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                    
-                                }else{
-                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                }if Ai_return.result > highest as isize {
-                                    persistent = trial.clone();
-                                    highest = Ai_return.result;
-                                    turn.peice = tempPiece; turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                }
+                                Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                             }else {NE = false }
                         }else {NE = false }
             
@@ -797,19 +762,8 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                             let x = i + dis; let y = j - dis;
                             if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 if board.tile[x][y].colour == openent{SE = false;}
-                                trial = board.clone();
-                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                                trial = trial.Swap(&Final, &intial, true);
-                                if down == 0{
-                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                    
-                                }else{
-                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                }if Ai_return.result > highest as isize {
-                                    persistent = trial.clone();
-                                    highest = Ai_return.result;
-                                    turn.peice = tempPiece; turn.x = Final.x as u8; turn.y = Final.y;turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                }
+                                Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                             }else {SE = false }
                         }else {SE = false }
             
@@ -818,19 +772,8 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                             let x = i - dis; let y = j - dis;
                             if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 if board.tile[x][y].colour == openent{SW = false;}
-                                trial = board.clone();
-                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                                trial = trial.Swap(&Final, &intial, true);
-                                if down == 0{
-                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                    
-                                }else{
-                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                }if Ai_return.result > highest as isize {
-                                    persistent = trial.clone();
-                                    highest = Ai_return.result;
-                                    turn.peice = tempPiece; turn.x = Final.x as u8; turn.y = Final.y;turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                }
+                                Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                             }else {SW = false }
                         }else {SW = false }
             
@@ -839,19 +782,8 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                             let x = i - dis; let y = j + dis;
                             if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
                                 if board.tile[x][y].colour == openent{NW = false;}
-                                trial = board.clone();
-                                intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                                trial = trial.Swap(&Final, &intial, true);
-                                if down == 0{
-                                    Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                    
-                                }else{
-                                Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                }if Ai_return.result > highest as isize {
-                                    persistent = trial.clone();
-                                    highest = Ai_return.result;
-                                    turn.peice = tempPiece; turn.x = Final.x as u8; turn.y = Final.y;turn.ambigX = intial.x; turn.ambigY = intial.y;
-                                }
+                                Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                             }else {NW = false }
                         }else {NW = false }
                         //if Ai_return.result < -50 && down != 0{return Ai_return;}
@@ -861,138 +793,50 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                     if i < 6 && j < 7 {
                         let x = i + 2; let y = j + 1;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }if i < 6 && j > 0 {
                         let x = i + 2; let y = j - 1;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }if i < 7 && j < 6 {
                         let x = i + 1; let y = j + 2;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }if i < 7 && j > 1 {
                         let x = i + 1; let y = j - 2;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }if i > 0 && j < 6 {
                         let x = i - 1; let y = j + 2;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }if i > 0 && j > 1 {
                         let x = i - 1; let y = j - 2;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y;turn.peice = 'N';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }if i > 1 && j < 7 {
                         let x = i - 2; let y = j + 1;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y;  turn.peice = 'N'; turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }if i > 1 && j > 0 {
                         let x = i - 2; let y = j - 1;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y;  turn.peice = 'N'; turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }
                     if Ai_return.result < -50 && down != 0{return Ai_return;}
@@ -1003,133 +847,56 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                     if i < 7 { 
                         let x = i + 1; let y = j;
                         if board.tile[x][y].colour != colour && board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'K';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }
                     
                     if i<7 &&j < 7 {   
                         let x = i+1; let y = j+1;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'K';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }
                     if j < 7 {
                           
                         let x = i; let y = j+1;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'K';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }
                     if i > 0 && j < 7 {
                           
                         let x = i - 1; let y = j + 1;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'K';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }
                     if i > 0 {
                           
                         let x = i -1 ; let y = j;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'K';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                            if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }
                     if i > 0 && j> 0 {
                           
                         let x = i -1; let y = j-1;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'K';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }
                     if j > 0 {
                           
                         let x = i; let y = j-1;
                         if board.tile[x][y].colour != colour&& board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                                
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'K';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }
                     
@@ -1137,18 +904,8 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                           
                         let x = i + 1; let y = j -1;
                         if board.tile[x][y].colour != colour && board.tile[x][y].peice != 'K'{
-                            trial = board.clone();
-                            intial.x = i as u8; intial.y = j as u8; Final.x = x as u8; Final.y = y as u8;
-                            trial = trial.Swap(&Final, &intial, true);
-                            if down == 0{
-                                Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;   
-                            }else{
-                            Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            }if Ai_return.result > highest as isize {
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = Final.x as u8; turn.y = Final.y; turn.peice = 'K';turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Results = possibleSwaper(board, highest, x, y, i, j, player, colour, openent, debug, down, depth, swap, tempPiece);
+                                if (Results.result > highest ){highest = Results.result; Ai_return.play = Results.play; }
                         }
                     }
                     
