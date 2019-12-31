@@ -322,6 +322,18 @@ fn main() {
 
             check = minmaxAi::CheckDetc(&board, &sphere, false);
 
+            if check.black == true{
+                let checkMate = minmaxAi::possibleMoves(&board, 1, 1, false, 0, 2, 1).play;
+                print!("black in check mate");
+                if checkMate.peice == ' '{break;}
+            }
+            if check.white == true{
+                println!("prp");
+                let checkMate = minmaxAi::possibleMoves(&board, 2, 2, false, 0, 2, 1).play;
+                println!("white in check mate {}", checkMate.peice);
+                if checkMate.peice == ' '{break;}
+            }
+
             if board.player == false {colour = 1;} else {colour = 2;}
 
             if (board.playerAi.BlackAi == true && colour == 1) || (board.playerAi.WhiteAi  == true && colour == 2){
@@ -416,9 +428,23 @@ fn main() {
             //detects in player is in check
             if board.player == true && check.white == true && Ai_Play == false{
                 print!("in check");
+                let mut checkMate = minmaxAi::Displace::new();
+                checkMate = minmaxAi::possibleMoves(&board, 1, 1, debug, 0, 1, 1).play;
+                print!("checkMate serre {}", checkMate.peice);
+                if checkMate.peice == ' '{
+                    print!("checkmate");
+                }
+
                 board = oldstate.clone(); //puts back into old state if they are
             }else if board.player == false && check.black == true && Ai_Play == false{
                 print!("in check");
+                let mut checkMate = minmaxAi::Displace::new();
+                checkMate = minmaxAi::possibleMoves(&board, 1, 1, debug, 0, 1, 1).play;
+                print!("checkMate serre {}", checkMate.peice);
+                if checkMate.peice == ' '{
+                    print!("checkMate" );
+                }
+
                 board = oldstate.clone();
             }else {
                 history = format!("{}{}{}{}{}", end.moveStr[0], end.moveStr[1], end.moveStr[2], end.moveStr[3], end.moveStr[4]);
