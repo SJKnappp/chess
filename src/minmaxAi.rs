@@ -516,7 +516,7 @@ fn turn_Score(board : &Board, sphere : &[[Sphere;8];8], turn : &Displace, colour
         }
     }
 
-    gain += scores(turn.peice) * selfSphere[turn.x as usize][turn.y as usize] as i16;
+    gain += scores(turn.peice) * 4 * selfSphere[turn.x as usize][turn.y as usize] as i16;
     if board.tile[turn.x as usize][turn.y as usize].colour == openent {gain += scores(board.tile[turn.x as usize][turn.y as usize].peice);}
     risk += scores(turn.peice) * opSphere[turn.x as usize][turn.y as usize] as i16;
     return (gain - risk) as isize;
@@ -626,17 +626,16 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
                         intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as isize + direc) as u8;
                         trial = trial.Swap( &Final, &intial, true);
                         if down == 0 {
-                            Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
-                            if Ai_return.result > highest as isize{
-                                persistent = trial.clone();
-                                highest = Ai_return.result;
-                                turn.x = i as u8; turn.y = ( j as isize + direc)as u8; turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
-                            }
+                            Ai_return.result = swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;   
                         }else{
                             Ai_return.result += swap * possibleMoves(&trial.clone(), player, openent, debug, down+1, depth, swap).result;
+                        }if Ai_return.result > highest as isize{
+                            persistent = trial.clone();
+                            highest = Ai_return.result;
+                            turn.x = i as u8; turn.y = ( j as isize + direc)as u8; turn.peice = 'p'; turn.ambigX = intial.x; turn.ambigY = intial.y;
                         }
                     }
-                    if board.tile[i][j].moved == false && board.tile[i][(j as isize + 2* direc) as usize].colour == 0 && board.tile[i][(j as isize + 2* direc) as usize].peice != 'K'{
+                    if board.tile[i][j].moved == false && board.tile[i][(j as isize + 2* direc) as usize].colour == 0 && board.tile[i][(j as isize + direc) as usize].colour == 0 && board.tile[i][(j as isize + 2* direc) as usize].peice != 'K'{
                         trial = board.clone();
                         intial.x = i as u8; intial.y = j as u8; Final.x = i as u8; Final.y = (j as isize + 2*direc) as u8;
                         trial = trial.Swap(&Final, &intial, true);
@@ -1176,6 +1175,7 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
     //Ai_return.result += (2 * aiScoreTrack.reward + aiScoreTrack.protected - aiScoreTrack.risk)/(down + 1) as isize ^ 2;
     if turn.x != 8 && turn.y != 8{
         Ai_return.result += turn_Score(&persistent, &sphere, &turn, colour, openent);
+        
     }
     
     if down == 0{
