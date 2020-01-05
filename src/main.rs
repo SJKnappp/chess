@@ -314,7 +314,7 @@ fn main() {
     while running { //main loop
         if moveAccepted == true{
             print!("turn: {}", turnCount);
-            if turnCount == 50{print!("reaached temperay turn limit");break;}
+            if turnCount == 100 {print!("reaached temperay turn limit");break;}
 
 
             if board.player == true{board.player = false; }else{board.player = true;} //player

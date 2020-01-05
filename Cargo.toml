@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 ansi_term = "0.12.1"
+rusqlite = "0.21.0"
