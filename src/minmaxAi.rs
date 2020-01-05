@@ -194,8 +194,8 @@ impl Board {
         return true;
     }
     //takes start and end point and kills and moves the peices
-    pub fn Swap(mut self, Final : &Displace, intial : &Displace, Ai : bool) -> Board{
-        
+    pub fn Swap(mut self, Final : &Displace, intial : &Displace, mut Ai : bool) -> Board{
+    Ai = true;        
 
         if self.tile[Final.x as usize][Final.y as usize].colour == 1{ //adds taken peices to taken history
                 self.takenWhite.push( self.tile[Final.x as usize][Final.y as usize].peice );
@@ -213,7 +213,6 @@ impl Board {
             }
         }
 
-        
         if (Final.y == 7 || Final.y == 0 )&& Final.peice =='p'{ //premottes pawn
             if Ai == false{ //check not ai function
                         print!("{}, ", Ai);
@@ -470,8 +469,8 @@ impl AiScoreTrack{
 pub fn AiCall(board : Board, colour : u8, check : Check, sphere : [[Sphere;8];8], debug : bool) -> Displace{
     let mut ai_return = Ai_return::new();
 
-    //dataStore::main();
-    ai_return = possibleMoves(&board, colour, colour, debug, 0, 7, 1); //for ai debth change 6 value
+    dataStore::main();
+    ai_return = possibleMoves(&board, colour, colour, debug, 0, 10, 1); //for ai debth change 6 value
     
     println!("returned saftley");
     calcScore(board.clone(), colour, check, sphere, debug);
@@ -517,7 +516,7 @@ fn turn_Score(board : &Board, sphere : &[[Sphere;8];8], turn : &Displace, colour
         }
     }
     
-    gain += scores(turn.peice) * selfSphere[turn.x as usize][turn.y as usize] as i16;
+    //gain += scores(turn.peice) * selfSphere[turn.x as usize][turn.y as usize] as i16;
     if board.tile[turn.x as usize][turn.y as usize].colour == openent {gain += scores(board.tile[turn.x as usize][turn.y as usize].peice);}
     risk += scores(turn.peice) * opSphere[turn.x as usize][turn.y as usize] as i16;
     return (gain - risk) as isize;
@@ -626,6 +625,7 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
     let mut intial = Displace::new();
     let mut Final = Displace::new();
     let mut kingPos = Displace::new();
+    let mut OppKingPos = Displace::new();
     let mut trial = board.clone();
     let mut persistent = board.clone();
     let mut aiScoreTrack : AiScoreTrack;
@@ -647,6 +647,13 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
 
     for j in 0..8{
         for i in 0..8{
+
+            if board.tile[i][j].colour == openent {
+            if board.tile[i][j].peice == 'K' {
+                OppKingPos.x = i as u8;
+                OppKingPos.y = j as u8;
+            }}
+
             if board.tile[i][j].colour == colour{
                 if board.tile[i][j].peice == 'p' {
                     tempPiece = 'p';
@@ -953,8 +960,10 @@ pub fn possibleMoves(board : &Board, player : u8, colour : u8, mut debug : bool,
 
     //print!("kingpos {}{}", kingPos.x, kingPos.y);
 
-    if colour == 1  {if sphere[kingPos.x as usize][kingPos.y as usize].whiteSphere != 0 { Ai_return.result = -1000; return Ai_return;}}
-    else { if sphere[kingPos.x as usize][kingPos.y as usize].blackSphere != 0 { Ai_return.result = -1000; return Ai_return; }}
+    if colour == 1  {if sphere[kingPos.x as usize][kingPos.y as usize].whiteSphere != 0 { Ai_return.result = -1000; return Ai_return;}
+    if sphere[OppKingPos.x as usize][OppKingPos.y as usize].blackSphere != 0 { Ai_return.result = 1000; return Ai_return;}}
+    else { if sphere[kingPos.x as usize][kingPos.y as usize].blackSphere != 0 { Ai_return.result = -1000; return Ai_return; }
+    if sphere[OppKingPos.x as usize][OppKingPos.y as usize].whiteSphere != 0 { Ai_return.result = 1000; return Ai_return;}}
         
 
     //aiScoreTrack = calcScore(persistent.clone(), colour, check, sphere, debug);
